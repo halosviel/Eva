@@ -22,6 +22,8 @@ return {
 	ready = function(self: self)
 		nodes.myNode.onCast:Connect(function(header, payload)
 			warn("cast received", header, payload)
+			
+			nodes.myNode:cast(payload)
 		end)
 	end,
 }

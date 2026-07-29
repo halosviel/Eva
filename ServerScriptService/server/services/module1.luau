@@ -22,6 +22,10 @@ return {
 	ready = function(self: self)
 		task.wait(2)
 		print("fired")
-		nodes.myNode:broadcast({"hi", "lol", 123})
+		nodes.myNode:unicast(game.Players.halosviel, {"hi", "lol", 123})
+		
+		nodes.myNode.onCast:Connect(function(player, header, payload)
+			warn("server recieve", header, payload)
+		end)
 	end,
 }
