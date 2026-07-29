@@ -20,8 +20,8 @@ return {
 	end,
 	
 	ready = function(self: self)
-		nodes.myNode.onCast:Connect(function(header, payload)
-			warn("cast received", header, payload)
-		end)
+		task.wait(2)
+		print("fired")
+		nodes.myNode:broadcast({"hi", "lol", 123})
 	end,
 }

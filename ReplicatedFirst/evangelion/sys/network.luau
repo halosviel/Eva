@@ -15,7 +15,7 @@
 local expect = require("./expect")
 local log = require("./log")
 
-local nodes = require("@game/ReplicatedFirst/client/nodes")
+local nodes = require("@game/ReplicatedFirst/nodes")
 assert(typeof(nodes) == "table", `Table expected for \`nodes\`, got {typeof(nodes)}`)
 
 local signal = require("../libs/cuteSignal")
@@ -51,88 +51,74 @@ end
 
 --## RemoteEvent ##--
 
-type _RemoteEvent = {
-	instance: RemoteEvent,
-	unicast: ( self: _RemoteEvent, player: Player, payload: nodes.Payload ) -> nil,
-	broadcast: ( self: _RemoteEvent, payload: nodes.Payload ) -> nil,
-	multicast: ( self: _RemoteEvent, players: { Player }, payload: nodes.Payload ) -> nil,
-	anycast: ( self: _RemoteEvent, payload: nodes.Payload ) -> nil,
-	cast: ( self: _RemoteEvent, payload: nodes.Payload ) -> nil,
-	onCast: signal.Signal,
-}
-
 local RemoteEvent
 RemoteEvent = {
-	new = function(instance: Instance) : _RemoteEvent
-		local self: _RemoteEvent = setmetatable({
+	new = function(instance: Instance) : nodes._RemoteEvent
+		local self: nodes._RemoteEvent = setmetatable({
 			instance = instance,
 			onCast = signal.new()
 		}, RemoteEvent)
 		
-		self.onCast:Connect(function(header: nodes.Header, payload: nodes.Payload)
-			if typeof(header) ~= "table" then
-				return
-			end
-			if typeof(header.sender) ~= "string" then
-				return
-			end
-			if typeof(header.recipent) ~= "string" then
-				return
-			end
-			if typeof(header.timestamp) ~= "number" then
-				return
-			end
-			
-			if typeof(payload) ~= "table" then
-				return
-			end
-			
-			warn("RECIEVED", game.RunService:IsServer() and "Server" or "Client", header, payload)
-		end)
+		--# event handling
+		if game.RunService:IsServer() then
+			instance.OnServerEvent:Connect(function(player: Player, header: nodes.Header, payload: nodes.Payload)
+				self.onCast:Fire(player, header, payload)
+			end)
+		else
+			instance.OnClientEvent:Connect(function(header: nodes.Header, payload: nodes.Payload)
+				self.onCast:Fire(header, payload)
+			end)
+		end
 		
 		return self
 	end,
 	
 	--## Server to Client ##--
 	
-	unicast = function(self: _RemoteEvent, player: Player, payload: nodes.Payload)
+	unicast = function(self: nodes._RemoteEvent, player: Player, payload: nodes.Payload)
 		expectServer("Unicasting")
 		expect("Player", player, "Cast recipent must be a player")
+		expect("table", payload, "Payload must be a table")
 		
 		self.instance:FireClient(player, createHeader(tostring(player)), payload)
 	end,
 	
-	broadcast = function(self: _RemoteEvent, payload: nodes.Payload)
+	broadcast = function(self: nodes._RemoteEvent, payload: nodes.Payload)
 		expectServer("Broadcasting")
+		expect("table", payload, "Payload must be a table")
 		
-		for _, player: Player in game.Players:GetPlayers() do
-			self.instance:FireAllClients(createHeader(tostring(player)), payload)
-		end
+		self.instance:FireAllClients(createHeader("All players"), payload)
 	end,
 	
-	multicast = function(self: _RemoteEvent, players: { Player }, payload: nodes.Payload)
+	multicast = function(self: nodes._RemoteEvent, players: { Player }, payload: nodes.Payload)
 		expectServer("Multicasting")
-		expect("table", players)
+		expect("table", players, "Cast recipents must be a table of players")
+		expect("table", payload, "Payload must be a table")
 		
 		for _, player: Player in players do
 			expect("Player", player)
-			self.instance:FireClient(player, createHeader(tostring(player)), payload)
+			self.instance:FireClient(player, createHeader(table.concat(players, ", ")), payload)
 		end
 	end,
 	
 	--# NOTE: Nothing happens if there are no players
-	anycast = function(self: _RemoteEvent, payload: nodes.Payload)
+	anycast = function(self: nodes._RemoteEvent, payload: nodes.Payload)
+		expectServer("Anycasting")
+		expect("table", payload, "Payload must be a table")
+		
 		local players: { Player } = game.Players:GetPlayers()
 		if #players > 0 then
 			local randomPlayer: Player = players[math.random(1, #players)]
-			self.instance:FireClient(randomPlayer, createHeader(tostring(randomPlayer)), payload)
+			self.instance:FireClient(randomPlayer, createHeader("Random"), payload)
 		end
 	end,
 	
 	--## Client to Server ##--
 	
-	cast = function(self: _RemoteEvent, payload: nodes.Payload)
+	cast = function(self: nodes._RemoteEvent, payload: nodes.Payload)
 		expectClient("Casting")
+		expect("table", payload, "Payload must be a table")
+		
 		self.instance:FireServer(createHeader("Server"), payload)
 	end,
 }
@@ -145,6 +131,7 @@ type _RemoteFunction = {
 	request: ( self: _RemoteFunction, ...any ) -> nil,
 	onRequest: ( self: _RemoteFunction, ...any ) -> nil,
 }
+
 
 --## Network ##--
 
@@ -170,7 +157,7 @@ function Network.setup()
 			end
 			
 			--# prep default data
-			local instance: string?
+			local instance: RemoteEvent?
 			local throttle: number? = 0 --# no cooldown
 			local paramCount: number? = math.huge --# inf params
 			
@@ -202,9 +189,10 @@ function Network.setup()
 			instance.Name = nodeName
 			instance.Parent = eventsFolder
 			
-			--## Overwrite Nodes Module ##--
+			--## Create RemoteEvent Class ##--
 			
-			nodes[nodeName] = instance
+			local remoteEvent: nodes._RemoteEvent = RemoteEvent.new(instance)
+			nodes[nodeName] = remoteEvent
 		end
 	elseif game.RunService:IsClient() then
 		--## Find Events Folder ##--
@@ -213,13 +201,14 @@ function Network.setup()
 		
 		--## Overwrite Nodes Module ##--
 		
-		local function overwriteNode(event: Instance)
-			nodes[event.Name] = event
+		local function overwriteNode(instance: Instance)
+			local remoteEvent: nodes._RemoteEvent = RemoteEvent.new(instance)
+			nodes[instance.Name] = remoteEvent
 		end
 		
 		eventsFolder.ChildAdded:Connect(overwriteNode)
-		for _, event: Instance in eventsFolder:GetChildren() do
-			overwriteNode(event)
+		for _, instance: Instance in eventsFolder:GetChildren() do
+			overwriteNode(instance)
 		end
 	end
 end
