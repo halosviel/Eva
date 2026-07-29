@@ -1,3 +1,10 @@
+export type Header = {
+	sender: string,
+	recipent: string,
+	timestamp: number
+}
+export type Payload = { any }
+
 return {
 	myNode = {
 		reliable = true, -- determines whether the node is a RemoteEvent or an UnreliableRemoteEvent (overrides `returns`)
