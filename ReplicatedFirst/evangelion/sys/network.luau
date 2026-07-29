@@ -147,9 +147,14 @@ RemoteEvent = {
 		expect("table", players, "Cast recipents must be a table of players")
 		expect("table", payload, "Payload must be a table")
 		
+		local names: { string } = {}
+		for _, player: Player in players do
+			table.insert(names, player.Name)
+		end
+		
 		for _, player: Player in players do
 			expect("Player", player)
-			self.instance:FireClient(player, createHeader(table.concat(players, ", ")), payload)
+			self.instance:FireClient(player, createHeader(table.concat(names, ", ")), payload)
 		end
 	end,
 	

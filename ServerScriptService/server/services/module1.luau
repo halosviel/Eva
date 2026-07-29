@@ -21,10 +21,7 @@ return {
 	
 	ready = function(self: self)
 		task.wait(2)
-		nodes.myNode:unicast(game.Players.halosviel, {"hi", "lol", 123})
-		
-		nodes.myNode.onCast:Connect(function(player, header, payload)
-			warn("server recieve", header, payload)
-		end)
+		warn("server fire")
+		nodes.myNode:multicast({game.Players.halosviel}, {"hi", "lol", 123})
 	end,
 }
