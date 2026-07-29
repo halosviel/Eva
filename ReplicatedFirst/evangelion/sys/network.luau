@@ -20,13 +20,6 @@ assert(typeof(nodes) == "table", `Table expected for \`nodes\`, got {typeof(node
 
 local signal = require("../libs/cuteSignal")
 
-type NodeMetadata = {
-	reliable: boolean?,
-	returns: boolean?,
-	throttle: number?,
-	paramCount: number?
-}
-
 --## Helpers ##--
 
 local function expectServer(action: string)
@@ -53,19 +46,78 @@ end
 
 local RemoteEvent
 RemoteEvent = {
-	new = function(instance: Instance) : nodes._RemoteEvent
+	new = function(instance: Instance, nodeMetadata: nodes.NodeMetadata) : nodes._RemoteEvent
 		local self: nodes._RemoteEvent = setmetatable({
 			instance = instance,
-			onCast = signal.new()
+			metadata = nodeMetadata,
+			onCast = signal.new(),
+			lastFired = 0
 		}, RemoteEvent)
 		
-		--# event handling
+		--## Local Helpers ##--
+		
+		local function validateCast(header: nodes.Header, payload: nodes.Payload) : boolean
+			if typeof(header) ~= "table" then
+				return false
+			end
+			if typeof(header.sender) ~= "string" then
+				return false
+			end
+			if typeof(header.recipent) ~= "string" then
+				return false
+			end
+			if typeof(header.timestamp) ~= "number" then
+				return false
+			end
+			
+			if typeof(payload) ~= "table" then
+				return false
+			end
+			
+			return true
+		end
+		
+		local function validateThrottle() : boolean
+			if self.metadata.throttle == 0 then
+				--print("throttle dropped")
+				return false
+			end
+			
+			if workspace:GetServerTimeNow() - self.lastFired < self.metadata.throttle then
+				return true
+			else
+				return false
+			end
+		end
+		
+		--## Event Handling ##--
+		
 		if game.RunService:IsServer() then
 			instance.OnServerEvent:Connect(function(player: Player, header: nodes.Header, payload: nodes.Payload)
+				local isCastValid: boolean = validateCast(header, payload)
+				if isCastValid == false then
+					player:Kick("Remote tampering")
+					return
+				end
+				
+				local throttled: boolean = validateThrottle()
+				if throttled == true then
+					--print("throttled server")
+					return
+				end
+				
+				self.lastFired = workspace:GetServerTimeNow()
 				self.onCast:Fire(player, header, payload)
 			end)
 		else
 			instance.OnClientEvent:Connect(function(header: nodes.Header, payload: nodes.Payload)
+				local throttled: boolean = validateThrottle()
+				if throttled == true then
+					--print("throttled client")
+					return
+				end
+				
+				self.lastFired = workspace:GetServerTimeNow()
 				self.onCast:Fire(header, payload)
 			end)
 		end
@@ -147,7 +199,7 @@ function Network.setup()
 		
 		--## Create Event Instances ##--
 		
-		for nodeName: string, metadata: NodeMetadata in nodes do
+		for nodeName: string, metadata: nodes.NodeMetadata in nodes do
 			--## Validate ##--
 			expect("string", nodeName, "Node must have a string key")
 			expect("table", metadata, `Node must have a table value`)
@@ -191,7 +243,7 @@ function Network.setup()
 			
 			--## Create RemoteEvent Class ##--
 			
-			local remoteEvent: nodes._RemoteEvent = RemoteEvent.new(instance)
+			local remoteEvent: nodes._RemoteEvent = RemoteEvent.new(instance, metadata)
 			nodes[nodeName] = remoteEvent
 		end
 	elseif game.RunService:IsClient() then
@@ -202,7 +254,7 @@ function Network.setup()
 		--## Overwrite Nodes Module ##--
 		
 		local function overwriteNode(instance: Instance)
-			local remoteEvent: nodes._RemoteEvent = RemoteEvent.new(instance)
+			local remoteEvent: nodes._RemoteEvent = RemoteEvent.new(instance, nodes[instance.Name])
 			nodes[instance.Name] = remoteEvent
 		end
 		
