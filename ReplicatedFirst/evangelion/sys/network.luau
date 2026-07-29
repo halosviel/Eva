@@ -4,7 +4,7 @@
 	created: 2026 July 19
 	
 	[DESCRIPTION]
-	Renouveau's networking system. Inspired by the Internet Protocol.
+	Evangelion's networking system. Inspired by the Internet Protocol.
 ]=]
 
 local expect = require("./expect")
@@ -26,11 +26,11 @@ function Network.setup()
 		for name: string, nodeData: string in nodes do
 			local args: { string } = table.pack(nodeData)
 			
-			local nodeName: string = args[1]
+			--[[local nodeName: string = args[1]
 			expect("string", nodeName)
 			
 			local nodeType: string = args[2]
-			expect("string", nodeType)
+			expect("string", nodeType)]]
 			
 			local instance: string
 		end

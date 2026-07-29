@@ -27,8 +27,8 @@
 ]=]
 
 -- [REQUIRES]
-local expect = require("@game/ReplicatedFirst/renouveau/sys/expect")
-local log = require("@game/ReplicatedFirst/renouveau/sys/log")
+local expect = require("@game/ReplicatedFirst/evangelion/sys/expect")
+local log = require("@game/ReplicatedFirst/evangelion/sys/log")
 
 -- [TYPES]
 type NumberSequenceData = {

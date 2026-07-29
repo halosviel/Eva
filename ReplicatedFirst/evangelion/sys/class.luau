@@ -24,7 +24,7 @@
 ]=]
 
 -- [REQUIRES]
-local expect = require("@game/ReplicatedFirst/renouveau/sys/expect")
+local expect = require("@game/ReplicatedFirst/evangelion/sys/expect")
 -->
 
 return function(class) --# keep return type generic !!

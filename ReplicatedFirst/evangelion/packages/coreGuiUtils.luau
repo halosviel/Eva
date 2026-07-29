@@ -18,7 +18,7 @@
 	  properly manage all requests.
 ]=]
 
-local expect = require("@game/ReplicatedFirst/renouveau/sys/expect")
+local expect = require("@game/ReplicatedFirst/evangelion/sys/expect")
 
 type self = {
 	setResetEnabled: ( self: self, enabled: boolean ) -> nil,

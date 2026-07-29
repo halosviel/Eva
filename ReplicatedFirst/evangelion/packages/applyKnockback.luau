@@ -15,8 +15,8 @@
 	- 2026 July 18: Made the `lift` parameter optional.
 ]=]
 
-local log = require("@game/ReplicatedFirst/renouveau/sys/log")
-local expect = require("@game/ReplicatedFirst/renouveau/sys/expect")
+local log = require("@game/ReplicatedFirst/evangelion/sys/log")
+local expect = require("@game/ReplicatedFirst/evangelion/sys/expect")
 
 return function(part: Part, lookVector: Vector3, force: number, lift: number?)
 	--# dont assert targetCharacter -> anything can happen at runtime!

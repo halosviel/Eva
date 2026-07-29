@@ -24,7 +24,7 @@ return {
 		--## Session Start ##--
 		
 		if self.JOIN_LOGS_ENABLED == true then
-			print(`Renouveau {self.VERSION}\n`)
+			print(`Evangelion {self.VERSION}\n`)
 			
 			--# functions from Pip's kofetch
 			local function getNetworkStatus() : string

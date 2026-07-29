@@ -1,5 +1,5 @@
-local network = require("@game/ReplicatedFirst/renouveau/sys/network")
+local network = require("@game/ReplicatedFirst/evangelion/sys/network")
 network.setup()
 
-local boot = require("@game/ReplicatedFirst/renouveau/sys/boot")
+local boot = require("@game/ReplicatedFirst/evangelion/sys/boot")
 boot(script.Parent)

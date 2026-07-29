@@ -39,10 +39,10 @@
 ]=]
 
 -- [REQUIRES]
-local expect = require("@game/ReplicatedFirst/renouveau/sys/expect")
-local log = require("@game/ReplicatedFirst/renouveau/sys/log")
+local expect = require("@game/ReplicatedFirst/evangelion/sys/expect")
+local log = require("@game/ReplicatedFirst/evangelion/sys/log")
 
-local maid = require("@game/ReplicatedFirst/renouveau/libs/maid")
+local maid = require("@game/ReplicatedFirst/evangelion/libs/maid")
 
 -- [TYPES]
 type self = {

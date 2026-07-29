@@ -28,7 +28,7 @@
 
 local class = require("./class")
 local expect = require("./expect")
-local signal = require("@game/ReplicatedFirst/renouveau/libs/cuteSignal")
+local signal = require("@game/ReplicatedFirst/evangelion/libs/cuteSignal")
 
 type self = {
 	MILESTONES: { number },
