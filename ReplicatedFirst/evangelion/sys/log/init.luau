@@ -44,7 +44,7 @@ local function getSource() : ( string, string )
 	return scriptName, line
 end
 
-return function(code: number, text: string, context: string?, fields: { { string } }?)
+return function(code: number, header: string, context: string?, fields: { { string } }?)
 	--# validate input
 	
 	local codeStr: string = tostring(code)
@@ -55,7 +55,7 @@ return function(code: number, text: string, context: string?, fields: { { string
 		error(`[!] No code info found for code {codeStr}`)
 	end
 	
-	assert(typeof(text) == "string", `[!] Given \`text\` was not a string (got {typeof(text)})`)
+	assert(typeof(header) == "string", `[!] Given \`text\` was not a string (got {typeof(header)})`)
 	
 	if context ~= nil then
 		assert(typeof(context) == "string", `[!] Given \`context\` was not a string (got {typeof(context)})`)
@@ -67,7 +67,7 @@ return function(code: number, text: string, context: string?, fields: { { string
 	
 	--# output message
 	
-	local textField: string = `{SEPARATOR} text: {text}`
+	local textField: string = `{SEPARATOR} header: {header}`
 	local contextField: string? = context ~= nil and `{SEPARATOR} context: {context}`
 	local fieldsStr: string? = fields ~= nil and (function()
 		assert(#fields > 0, `[!] Given \`fields\` is an empty table - populate it!`)
