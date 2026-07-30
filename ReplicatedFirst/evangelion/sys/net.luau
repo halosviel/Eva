@@ -64,15 +64,9 @@ net = {
 	--# must be called on runtime by index on server & client
 	setup = function()
 		if boundary == "Server" then
-			--## Create Instances ##--
-			
 			local eventsFolder: Folder = Instance.new("Folder")
 			eventsFolder.Name = "events"
 			eventsFolder.Parent = game.ReplicatedStorage
-			
-			
-		else
-			
 		end
 	end,
 	
@@ -89,13 +83,13 @@ net = {
 			log(1, "Unable to infer instance", "Either `reliable` or `returns` fields must exist")
 		end
 		
-		if metadata.reliable then
+		if metadata.reliable ~= nil then
 			expect("boolean", metadata.reliable)
 		end
-		if metadata.returns then
+		if metadata.returns ~= nil then
 			expect("boolean", metadata.returns)
 		end
-		if metadata.throttle then
+		if metadata.throttle ~= nil then
 			expect("number", metadata.throttle)
 		end
 		
@@ -121,7 +115,7 @@ net = {
 		
 		instance.Name = metadata.name
 		instance.Parent = eventsFolder
-		print("created", instance.ClassName, instance.Name)
+		--print("created", instance.ClassName, instance.Name)
 		
 		
 		--## Construct Object ##--
