@@ -12,7 +12,7 @@ return {
 		name = "NodeA",
 		reliable = true,
 		returns = false,
-		throttle = 0
+		throttle = 1
 	} :: net.NodeMetadata) :: net.CastNode,
 	
 	nodeB = net.newNode({

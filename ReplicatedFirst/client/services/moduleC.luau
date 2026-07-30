@@ -20,9 +20,14 @@ return {
 	end,
 	
 	ready = function(self: self)
+		warn("client sent")
 		nodes.nodeA:cast({
 			entry1 = "Hello",
 			entry2 = "World!"
 		})
+		
+		nodes.nodeA.onCast:Connect(function(header, payload)
+			warn("client receive", header, payload)
+		end)
 	end,
 }
