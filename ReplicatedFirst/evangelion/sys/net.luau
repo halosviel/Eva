@@ -38,7 +38,8 @@ export type NodeMetadata = {
 
 export type BaseNode = {
 	instance: RemoteEvent | UnreliableRemoteEvent | RemoteFunction,
-	metadata: NodeMetadata
+	metadata: NodeMetadata,
+	onCast: signal.Signal
 }
 
 --# Cast Node -> Remote Event
@@ -158,7 +159,8 @@ net = {
 		
 		local self: BaseNode = setmetatable({
 			instance = instance,
-			metadata = metadata
+			metadata = metadata,
+			onCast = signal.new()
 		} :: BaseNode, net)
 		
 		registeredNodes[self.metadata.name] = self
