@@ -72,13 +72,13 @@ local registeredNodes: { BaseNode } = {}
 
 local function expectServer(action: string)
 	if boundary == "Client" then
-		log(1, "Wrong boundary", `{action} can only be done on the client`)
+		log(1, "Wrong boundary", `{action} can only be done on the server`)
 	end
 end
 
 local function expectClient(action: string)
 	if boundary == "Server" then
-		log(1, "Wrong boundary", `{action} can only be done on the server`)
+		log(1, "Wrong boundary", `{action} can only be done on the client`)
 	end
 end
 
