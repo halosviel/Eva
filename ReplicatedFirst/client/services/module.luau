@@ -7,7 +7,7 @@
 	Module template.
 ]=]
 
-local nodes = require("@game/ReplicatedFirst/nodes")
+local nodes = require("@game/ReplicatedFirst/shared/nodes")
 
 local types = require("../types/services")
 type self = types.Module
