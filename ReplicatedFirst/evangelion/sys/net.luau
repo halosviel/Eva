@@ -39,7 +39,7 @@ export type NodeMetadata = {
 export type BaseNode = {
 	instance: RemoteEvent | UnreliableRemoteEvent | RemoteFunction,
 	metadata: NodeMetadata,
-	onCast: signal.Signal,
+	signal: signal.Signal,
 	lastFired: number
 }
 
@@ -48,16 +48,16 @@ export type BaseNode = {
 
 export type CastNode = BaseNode & {
 	onCast: signal.Signal,
-	cast: ( self: BaseNode, payload: Payload ) -> nil,
-	unicast: ( self: BaseNode, player: Player, payload: Payload ) -> nil,
-	broadcast: ( self: BaseNode, payload: Payload ) -> nil,
-	multicast: ( self: BaseNode, players: { Player }, payload: Payload ) -> nil,
-	anycast: ( self: BaseNode, payload: Payload ) -> nil
+	cast: ( self: CastNode, payload: Payload ) -> nil,
+	unicast: ( self: CastNode, player: Player, payload: Payload ) -> nil,
+	broadcast: ( self: CastNode, payload: Payload ) -> nil,
+	multicast: ( self: CastNode, players: { Player }, payload: Payload ) -> nil,
+	anycast: ( self: CastNode, payload: Payload ) -> nil
 }
 
 export type RequestNode = BaseNode & {
 	onRequest: signal.Signal,
-	request: ( self: BaseNode ) -> nil
+	request: ( self: RequestNode ) -> nil
 }
 
 -->
@@ -79,6 +79,14 @@ end
 local function expectClient(action: string)
 	if boundary == "Server" then
 		log(1, "Wrong boundary", `{action} can only be done on the client`)
+	end
+end
+
+local function expectInstance(instanceName: string, functionName: string, instance: RemoteEvent | UnreliableRemoteEvent| RemoteFunction)
+	if not instance:IsA(instanceName) then
+		local nodeType: string = instanceName == "RemoteEvent" and "request" or "cast"
+		log(1, "Illegal call", `Cannot call \`{functionName}\` on a {nodeType} node`)
+		return
 	end
 end
 
@@ -161,11 +169,14 @@ net = {
 		local self: BaseNode = setmetatable({
 			instance = instance,
 			metadata = metadata,
-			onCast = signal.new(),
+			signal = signal.new(),
 			lastFired = 0,
 		} :: BaseNode, net)
 		
 		registeredNodes[self.metadata.name] = self
+		
+		self.onRequest = self.signal
+		self.onCast = self.signal
 		
 		--## Local Helpers ##--
 		
@@ -206,7 +217,7 @@ net = {
 		--## Event Handling ##--
 		
 		if game.RunService:IsServer() then
-			instance.OnServerEvent:Connect(function(player: Player, header: Header, payload: Payload)
+			local function handleIncomingCast(player: Player, header: Header, payload: Payload) : any
 				local isCastValid: boolean = validateCast(header, payload)
 				if isCastValid == false then
 					player:Kick("Remote tampering")
@@ -220,10 +231,16 @@ net = {
 				end
 				
 				self.lastFired = workspace:GetServerTimeNow()
-				self.onCast:Fire(player, header, payload)
-			end)
+				return self.signal:Fire(player, header, payload)
+			end
+			
+			if instance.ClassName == "RemoteFunction" then
+				instance.OnServerInvoke = handleIncomingCast
+			else
+				instance.OnServerEvent:Connect(handleIncomingCast)
+			end
 		else
-			instance.OnClientEvent:Connect(function(header: Header, payload: Payload)
+			local function handleIncomingCast(header: Header, payload: Payload) : any
 				local throttled: boolean = validateThrottle()
 				if throttled == true then
 					--print("throttled client")
@@ -231,8 +248,14 @@ net = {
 				end
 				
 				self.lastFired = workspace:GetServerTimeNow()
-				self.onCast:Fire(header, payload)
-			end)
+				return self.signal:Fire(header, payload)
+			end
+			
+			if instance.ClassName == "RemoteFunction" then
+				instance.OnClientInvoke = handleIncomingCast()
+			else
+				instance.OnClientEvent:Connect(handleIncomingCast)
+			end
 		end
 		
 		return self
@@ -242,6 +265,8 @@ net = {
 	
 	unicast = function(self: BaseNode, player: Player, payload: Payload)
 		expectServer("Unicasting")
+		expectInstance("RemoteEvent", "unicast()", self.instance)
+		
 		expect("Player", player, "Cast recipent must be a player")
 		expect("table", payload, "Payload must be a table")
 		
@@ -251,6 +276,7 @@ net = {
 	
 	broadcast = function(self: BaseNode, payload: Payload)
 		expectServer("Broadcasting")
+		expectInstance("RemoteEvent", "broadcast()", self.instance)
 		expect("table", payload, "Payload must be a table")
 		
 		local header: Header = createHeader("All players")
@@ -259,6 +285,7 @@ net = {
 	
 	multicast = function(self: BaseNode, players: { Player }, payload: Payload)
 		expectServer("Multicasting")
+		expectInstance("RemoteEvent", "multicast()", self.instance)
 		expect("table", players, "Cast recipents must be a table of players")
 		expect("table", payload, "Payload must be a table")
 		
@@ -277,6 +304,7 @@ net = {
 	--# NOTE: Nothing happens if there are no players
 	anycast = function(self: BaseNode, payload: Payload)
 		expectServer("Anycasting")
+		expectInstance("RemoteEvent", "anycast()", self.instance)
 		expect("table", payload, "Payload must be a table")
 		
 		local players: { Player } = game.Players:GetPlayers()
@@ -287,10 +315,13 @@ net = {
 		end
 	end,
 	
-	--## Server & Client ##--
+	--## Client Only ##--
 	
+	--# only client can call `cast()` to server.
+	--# server uses the other casting methods
 	cast = function(self: BaseNode, payload: Payload)
 		expectClient("Casting")
+		expectInstance("RemoteEvent", "cast()", self.instance)
 		expect("table", payload, "Payload must be a table")
 		
 		local header: Header = createHeader(boundary == "Server" and "Client" or "Server")
