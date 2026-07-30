@@ -20,6 +20,9 @@ return {
 	end,
 	
 	ready = function(self: self)
-		
+		nodes.nodeA:cast({
+			entry1 = "Hello",
+			entry2 = "World!"
+		})
 	end,
 }

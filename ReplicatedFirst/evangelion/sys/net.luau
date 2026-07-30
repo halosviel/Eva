@@ -12,6 +12,7 @@
 	- Intellisense can see both the client and server's types.
 	- Requires some boolean logic thinking to figure out the `returns` and `reliable`
 	  metadata to get the desired event type, but you'll get the hang of it quickly.
+	- The `Header` and `Payload` types are duplicated with the `nodes` module - make sure they're synced!
 ]=]
 
 local expect = require("@game/ReplicatedFirst/evangelion/sys/expect")
@@ -19,12 +20,14 @@ local log = require("@game/ReplicatedFirst/evangelion/sys/log")
 
 local signal = require("@game/ReplicatedFirst/evangelion/libs/cuteSignal")
 
+--# same types as nodes!!
 export type Header = {
 	sender: string,
 	recipent: string,
 	timestamp: number
 }
 export type Payload = { any }
+-------------------------
 
 export type NodeMetadata = {
 	name: string,

@@ -1,5 +1,12 @@
 local net = require("@game/ReplicatedFirst/evangelion/sys/net")
 
+export type Header = {
+	sender: string,
+	recipent: string,
+	timestamp: number
+}
+export type Payload = { [string]: any }
+
 return {
 	nodeA = net.newNode({
 		name = "NodeA",
