@@ -84,7 +84,7 @@ end
 
 local function createHeader(recipent: string?) : Header
 	return {
-		sender = boundary,
+		sender = boundary == "Client" and game.Players.LocalPlayer.Name or "Server",
 		recipent = recipent or "?",
 		timestamp = workspace:GetServerTimeNow()
 	}
@@ -104,7 +104,7 @@ net = {
 		end
 	end,
 	
-	--# its up to you to mark the variable as a CastNode
+	--# its up to the caller to mark the node variable as a CastNode
 	--# or a RequestNode type
 	newNode = function(metadata: NodeMetadata) : BaseNode
 		

@@ -22,7 +22,7 @@ return {
 	ready = function(self: self)
 		nodes.nodeA.onCast:Connect(function(player: Player, header: nodes.Header, payload: nodes.Payload)
 			warn("server received", header, payload)
-			nodes.nodeA:unicast(game.Players.halosviel, {
+			nodes.nodeA:broadcast({
 				your = "mom"
 			})
 		end)
