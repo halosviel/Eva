@@ -58,6 +58,7 @@ export type RequestNode = BaseNode & {
 -->
 
 local boundary: string = game.RunService:IsServer() and "Server" or "Client"
+local registeredNodes: { BaseNode } = {}
 
 local net
 net = {
@@ -93,6 +94,10 @@ net = {
 			expect("number", metadata.throttle)
 		end
 		
+		if registeredNodes[metadata.name] ~= nil then
+			log(1, "Duplicate entry", `Entry \`{metadata.name}\` already exists`)
+		end
+		
 		
 		--## Create Instance ##--
 		
@@ -125,6 +130,7 @@ net = {
 			metadata = metadata
 		} :: BaseNode, net)
 		
+		registeredNodes[self.metadata.name] = self
 		return self
 	end,
 }
