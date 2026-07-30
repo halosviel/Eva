@@ -168,7 +168,7 @@ net = {
 		registeredNodes[self.metadata.name] = self
 		
 		--## Local Helpers ##--
-
+		
 		local function validateCast(header: Header, payload: Payload) : boolean
 			if typeof(header) ~= "table" then
 				return false
@@ -189,22 +189,22 @@ net = {
 			
 			return true
 		end
-
+		
 		local function validateThrottle() : boolean
 			if self.metadata.throttle == 0 then
 				--print("no throttle set")
 				return false
 			end
-
+			
 			if workspace:GetServerTimeNow() - self.lastFired < self.metadata.throttle then
 				return true
 			else
 				return false
 			end
 		end
-
+		
 		--## Event Handling ##--
-
+		
 		if game.RunService:IsServer() then
 			instance.OnServerEvent:Connect(function(player: Player, header: Header, payload: Payload)
 				local isCastValid: boolean = validateCast(header, payload)
@@ -212,13 +212,13 @@ net = {
 					player:Kick("Remote tampering")
 					return
 				end
-
+				
 				local throttled: boolean = validateThrottle()
 				if throttled == true then
 					--print("throttled server")
 					return
 				end
-
+				
 				self.lastFired = workspace:GetServerTimeNow()
 				self.onCast:Fire(player, header, payload)
 			end)
@@ -229,7 +229,7 @@ net = {
 					--print("throttled client")
 					return
 				end
-
+				
 				self.lastFired = workspace:GetServerTimeNow()
 				self.onCast:Fire(header, payload)
 			end)
