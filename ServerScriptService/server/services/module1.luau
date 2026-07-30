@@ -22,6 +22,6 @@ return {
 	ready = function(self: self)
 		task.wait(2)
 		warn("server fire")
-		nodes.myNode:multicast({game.Players.halosviel}, {"hi", "lol", 123})
+		nodes.myNode:anycast({"hi", "lol", 123})
 	end,
 }
