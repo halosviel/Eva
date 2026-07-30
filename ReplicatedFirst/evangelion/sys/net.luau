@@ -97,7 +97,7 @@ local net
 net = {
 	--# must be called on runtime by index on server & client
 	setup = function()
-		if boundary == "Server" then
+		if boundary == "Server" and not game.ReplicatedStorage:FindFirstChild("events") then
 			local eventsFolder: Folder = Instance.new("Folder")
 			eventsFolder.Name = "events"
 			eventsFolder.Parent = game.ReplicatedStorage
@@ -192,7 +192,7 @@ net = {
 
 		local function validateThrottle() : boolean
 			if self.metadata.throttle == 0 then
-				print("no throttle set")
+				--print("no throttle set")
 				return false
 			end
 
@@ -215,7 +215,7 @@ net = {
 
 				local throttled: boolean = validateThrottle()
 				if throttled == true then
-					print("throttled server")
+					--print("throttled server")
 					return
 				end
 
@@ -226,7 +226,7 @@ net = {
 			instance.OnClientEvent:Connect(function(header: Header, payload: Payload)
 				local throttled: boolean = validateThrottle()
 				if throttled == true then
-					print("throttled client")
+					--print("throttled client")
 					return
 				end
 
