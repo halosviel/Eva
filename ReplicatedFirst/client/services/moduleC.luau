@@ -21,7 +21,7 @@ return {
 	
 	ready = function(self: self)
 		warn("client sent")
-		nodes.nodeA:cast({
+		nodes.nodeA:unicast({
 			entry1 = "Hello",
 			entry2 = "World!"
 		})

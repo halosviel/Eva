@@ -11,7 +11,7 @@ return {
 	nodeA = net.newNode({
 		name = "NodeA",
 		reliable = true,
-		returns = false,
+		returns = true,
 		throttle = 1
 	} :: net.NodeMetadata) :: net.CastNode,
 	

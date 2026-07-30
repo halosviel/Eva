@@ -85,7 +85,7 @@ end
 local function expectInstance(instanceName: string, functionName: string, instance: RemoteEvent | UnreliableRemoteEvent| RemoteFunction)
 	if not instance:IsA(instanceName) then
 		local nodeType: string = instanceName == "RemoteEvent" and "request" or "cast"
-		log(1, "Illegal call", `Cannot call \`{functionName}\` on a {nodeType} node`)
+		log(1, "Illegal call", `Cannot call \`{functionName}\` on a {nodeType} node. Did you get confused?`)
 		return
 	end
 end
@@ -317,8 +317,6 @@ net = {
 	
 	--## Client Only ##--
 	
-	--# only client can call `cast()` to server.
-	--# server uses the other casting methods
 	cast = function(self: BaseNode, payload: Payload)
 		expectClient("Casting")
 		expectInstance("RemoteEvent", "cast()", self.instance)
