@@ -43,22 +43,50 @@ export type BaseNode = {
 
 export type CastNode = BaseNode & {
 	onCast: signal.Signal,
-	cast: ( self: CastNode, payload: Payload ) -> nil,
-	unicast: ( self: CastNode, player: Player, payload: Payload ) -> nil,
-	broadcast: ( self: CastNode, payload: Payload ) -> nil,
-	multicast: ( self: CastNode, players: { Player }, payload: Payload ) -> nil,
-	anycast: ( self: CastNode, payload: Payload ) -> nil
+	cast: ( self: BaseNode, payload: Payload ) -> nil,
+	unicast: ( self: BaseNode, player: Player, payload: Payload ) -> nil,
+	broadcast: ( self: BaseNode, payload: Payload ) -> nil,
+	multicast: ( self: BaseNode, players: { Player }, payload: Payload ) -> nil,
+	anycast: ( self: BaseNode, payload: Payload ) -> nil
 }
 
 export type RequestNode = BaseNode & {
 	onRequest: signal.Signal,
-	request: ( self: RequestNode ) -> nil
+	request: ( self: BaseNode ) -> nil
 }
 
 -->
 
 local boundary: string = game.RunService:IsServer() and "Server" or "Client"
 local registeredNodes: { BaseNode } = {}
+
+
+-->
+
+--## Helpers ##--
+
+local function expectServer(action: string)
+	if boundary == "Client" then
+		log(1, "Wrong boundary", `{action} can only be done on the client`)
+	end
+end
+
+local function expectClient(action: string)
+	if boundary == "Server" then
+		log(1, "Wrong boundary", `{action} can only be done on the server`)
+	end
+end
+
+local function createHeader(recipent: string?) : Header
+	return {
+		sender = boundary,
+		recipent = boundary == "Server" and "Server" or recipent or "?",
+		timestamp = workspace:GetServerTimeNow()
+	}
+end
+
+
+-->
 
 local net
 net = {
@@ -132,6 +160,65 @@ net = {
 		
 		registeredNodes[self.metadata.name] = self
 		return self
+	end,
+	
+	--## Server Only ##--
+	
+	unicast = function(self: BaseNode, player: Player, payload: Payload)
+		expectServer("Unicasting")
+		expect("Player", player, "Cast recipent must be a player")
+		expect("table", payload, "Payload must be a table")
+		
+		local header: Header = createHeader(tostring(player))
+		self.instance:FireClient(player, header, payload)
+	end,
+	
+	broadcast = function(self: BaseNode, payload: Payload)
+		expectServer("Broadcasting")
+		expect("table", payload, "Payload must be a table")
+		
+		local header: Header = createHeader("All players")
+		self.instance:FireAllClients(header, payload)
+	end,
+	
+	multicast = function(self: BaseNode, players: { Player }, payload: Payload)
+		expectServer("Multicasting")
+		expect("table", players, "Cast recipents must be a table of players")
+		expect("table", payload, "Payload must be a table")
+		
+		local names: { string } = {}
+		for _, player: Player in players do
+			table.insert(names, player.Name)
+		end
+		
+		for _, player: Player in players do
+			expect("Player", player)
+			local header: Header = createHeader(table.concat(names, ", "))
+			self.instance:FireClient(player, header, payload)
+		end
+	end,
+	
+	--# NOTE: Nothing happens if there are no players
+	anycast = function(self: BaseNode, payload: Payload)
+		expectServer("Anycasting")
+		expect("table", payload, "Payload must be a table")
+		
+		local players: { Player } = game.Players:GetPlayers()
+		if #players > 0 then
+			local randomPlayer: Player = players[math.random(1, #players)]
+			local header: Header = createHeader("Random")
+			self.instance:FireClient(randomPlayer, header, payload)
+		end
+	end,
+	
+	--## Server & Client ##--
+	
+	cast = function(self: BaseNode, payload: Payload)
+		expectClient("Casting")
+		expect("table", payload, "Payload must be a table")
+		
+		local header: Header = createHeader(boundary == "Server" and "Client" or "Server")
+		self.instance:FireServer(header, payload)
 	end,
 }
 net.__index = net

@@ -9,7 +9,7 @@ return {
 	} :: net.NodeMetadata) :: net.CastNode,
 	
 	nodeB = net.newNode({
-		name = "nodeB",
+		name = "NodeB",
 		reliable = true,
 		returns = false,
 		throttle = 0
