@@ -85,7 +85,7 @@ end
 local function createHeader(recipent: string?) : Header
 	return {
 		sender = boundary,
-		recipent = boundary == "Server" and "Server" or recipent or "?",
+		recipent = recipent or "?",
 		timestamp = workspace:GetServerTimeNow()
 	}
 end
