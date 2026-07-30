@@ -1,4 +1,4 @@
-local net = require("@game/ReplicatedFirst/evangelion/sys/net")
+local net = require("@game/ReplicatedFirst/eva/sys/net")
 
 export type Header = {
 	sender: string,
@@ -13,7 +13,7 @@ return {
 		reliable = true,
 		returns = true,
 		throttle = 1
-	} :: net.NodeMetadata) :: net.CastNode,
+	} :: net.NodeMetadata) :: net.RequestNode,
 	
 	nodeB = net.newNode({
 		name = "NodeB",

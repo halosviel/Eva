@@ -1,2 +1,2 @@
-local boot = require("@game/ReplicatedFirst/evangelion/sys/boot")
+local boot = require("@game/ReplicatedFirst/eva/sys/boot")
 boot(script.Parent)

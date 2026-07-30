@@ -24,7 +24,7 @@ return {
 		--## Session Start ##--
 		
 		if self.JOIN_LOGS_ENABLED == true then
-			print(`Evangelion {self.VERSION}\n`)
+			print(`Eva {self.VERSION}\n`)
 			
 			--# functions from Pip's kofetch
 			local function getNetworkStatus() : string

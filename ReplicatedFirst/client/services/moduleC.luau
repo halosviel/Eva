@@ -21,9 +21,11 @@ return {
 	
 	ready = function(self: self)
 		warn("client sent")
-		nodes.nodeA:unicast({
-			entry1 = "Hello",
-			entry2 = "World!"
+		nodes.nodeA:request({
+			entry1 = "These",
+			entry2 = "are",
+			entry3 = "client",
+			entry4 = "params",
 		})
 	end,
 }

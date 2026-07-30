@@ -11,7 +11,7 @@
 	textLabel.Text = `<font color="{myColor}">Hello world!</font>`
 ]=]
 
-local expect = require("@game/ReplicatedFirst/evangelion/sys/expect")
+local expect = require("@game/ReplicatedFirst/eva/sys/expect")
 
 return function(color3: Color3) : string
 	expect("Color3", color3)

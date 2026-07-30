@@ -4,7 +4,9 @@
 	created: 2026 July 30
 	
 	[DESCRIPTION]
-	The framework's custom networking module.
+	The framework's custom networking module that takes the conventional instance-based event
+	interface and turns it into a code-based one. Also adds built-in functionality that would otherwise
+	see repetition such as throttling.
 	
 	!! Must be required by both server and client !!
 	
@@ -15,10 +17,10 @@
 	- The `Header` and `Payload` types are duplicated with the `nodes` module - make sure they're synced!
 ]=]
 
-local expect = require("@game/ReplicatedFirst/evangelion/sys/expect")
-local log = require("@game/ReplicatedFirst/evangelion/sys/log")
+local expect = require("@game/ReplicatedFirst/eva/sys/expect")
+local log = require("@game/ReplicatedFirst/eva/sys/log")
 
-local signal = require("@game/ReplicatedFirst/evangelion/libs/cuteSignal")
+local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
 
 --# same types as nodes!!
 export type Header = {
@@ -324,6 +326,23 @@ net = {
 		
 		local header: Header = createHeader(boundary == "Server" and "Client" or "Server")
 		self.instance:FireServer(header, payload)
+	end,
+	
+	--## Remote Function ##--
+	
+	request = function(self: BaseNode, payload: Payload)
+		expectInstance("RemoteFunction", "request()", self.instance)
+		expect("table", payload, "Payload must be a table")
+		
+		if boundary == "Server" then
+			
+		else
+			local header: Header = createHeader("Server")
+			local returnPayload: Payload = self.instance:InvokeServer(header, payload)
+			expect("table", returnPayload, "`returnPayload` must be a table")
+			
+			self.signal:Fire(returnPayload)
+		end
 	end,
 }
 net.__index = net
