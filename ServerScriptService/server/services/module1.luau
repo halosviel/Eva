@@ -20,8 +20,6 @@ return {
 	end,
 	
 	ready = function(self: self)
-		task.wait(2)
-		warn("server fire")
-		nodes.myNode:anycast({"hi", "lol", 123})
+		
 	end,
 }

@@ -20,8 +20,6 @@ return {
 	end,
 	
 	ready = function(self: self)
-		nodes.myNode.onCast:Connect(function(header, payload)
-			warn("client receive", header, payload)
-		end)
+		
 	end,
 }
