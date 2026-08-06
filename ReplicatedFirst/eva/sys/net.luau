@@ -56,7 +56,11 @@ type Metadata = {
 type CastNode = {
 	instance: RemoteEvent | UnreliableRemoteEvent,
 	metadata: Metadata,
-	onCast: signal.Signal
+	onCast: signal.Signal,
+	UniCast: ( self: CastNode, targetPlayer: Player, payload: Payload ) -> nil,
+	Broadcast: ( self: CastNode, payload: Payload ) -> nil,
+	Multicast: ( self: CastNode, targetPlayers: { Player }, payload: Payload ) -> nil,
+	Anycast: ( self: CastNode, payload: Payload ) -> nil
 }
 
 type RequestNode = {
