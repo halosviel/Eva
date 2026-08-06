@@ -132,7 +132,7 @@ CastNodeTable = {
 	
 	--# To one player
 	Unicast = function(self: CastNode, targetPlayer: Player, payload: Payload)
-		expectServer()
+		expectServer(":Unicast()")
 		expect("Player", targetPlayer)
 		validatePayload(payload)
 		
@@ -142,7 +142,7 @@ CastNodeTable = {
 	
 	--# To everyone
 	Broadcast = function(self: CastNode, payload: Payload)
-		expectServer()
+		expectServer(":Broadcast()")
 		validatePayload(payload)
 		
 		local header: Header = createHeader("Server", "All Players")
@@ -153,7 +153,7 @@ CastNodeTable = {
 	--# If client needs to see if the cast was a multicast, they can use
 	--# string find on "Multicast" in the `recipient` entry
 	Multicast = function(self: CastNode, targetPlayers: { Player }, payload: Payload)
-		expectServer()
+		expectServer(":Multicast()")
 		expect("table", targetPlayers)
 		for _, player: Player in targetPlayers do
 			expect("Player", player)
@@ -168,7 +168,7 @@ CastNodeTable = {
 	
 	--# To random player
 	Anycast = function(self: CastNode, payload: Payload)
-		expectServer()
+		expectServer(":Anycast()")
 		validatePayload(payload)
 		
 		local players: { Player } = game.Players:GetPlayers()
