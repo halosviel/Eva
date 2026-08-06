@@ -9,8 +9,7 @@
 	
 	This module aims to pivot from the default instance-based event system, where pointers are
 	hardcoded and organisation becomes hefty with scale. It also provides built-in functionality
-	like rate limiting, which can become a repetetive endeavour. You can also edit this module
-	and implement your own custom functionality.
+	like rate limiting and selective casting.
 	
 	The system is inspired from the Internet Protocol, where a packet/datagram contains a `header`
 	and a `payload`. It also follows the API of the `Packet` library, albeit a bit differently.
@@ -126,7 +125,7 @@ end
 
 local CastNodeTable: CastNode?
 CastNodeTable = {
-	--## Client ##--
+	--## Client -> Server ##--
 	
 	cast = function(self: CastNode, payload: Payload)
 		expectClient()
@@ -136,7 +135,8 @@ CastNodeTable = {
 		self.instance:FireServer(header, payload)
 	end,
 	
-	--## Server ##--
+	--## Server -> Client ##--
+	--# (selective casting)
 	
 	Unicast = function(self: CastNode, targetPlayer: Player, payload: Payload)
 		expectServer()
@@ -148,11 +148,15 @@ CastNodeTable = {
 	end,
 	
 	Broadcast = function(self: CastNode, payload: Payload)
+		expectServer()
+		validatePayload(payload)
 		
+		local header: Header = createHeader("Server", "All Players")
+		self.instance:FireAllClients(header, payload)
 	end,
 	
 	Multicast = function(self: CastNode, payload: Payload)
-
+		
 	end,
 	
 	Anycast = function(self: CastNode, payload: Payload)
