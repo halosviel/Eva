@@ -70,8 +70,8 @@ type RequestNode = {
 
 type Net = {
 	setup: () -> nil,
-	newCastNode: ( self: Net ) -> CastNode,
-	newRequestNode: ( self: Net ) -> RequestNode
+	newCastNode: ( self: Net, metadata: Metadata ) -> CastNode,
+	newRequestNode: ( self: Net, Metadata: Metadata ) -> RequestNode
 }
 type self = Net
 
@@ -112,12 +112,14 @@ end
 local function expectServer(callbackName: string)
 	if runContext ~= "Server" then
 		log(1, `\`{callbackName}\` cannot be called on the client`)
+		return
 	end
 end
 
 local function expectClient(callbackName: string)
 	if runContext ~= "Client" then
 		log(1, `\`{callbackName}\` cannot be called on the server`)
+		return
 	end
 end
 
@@ -219,16 +221,14 @@ Net = {
 	
 	--# called by client & server index scripts
 	setup = function()
-		if runContext == "Server" then
-			--## Server Setup ##--
-			
-			local eventsFolder: Folder = Instance.new("Folder")
-			eventsFolder.Name = EVENTS_FOLDER_NAME
-			eventsFolder.Parent = game.ReplicatedStorage
-		else
-			--## Client Setup ##--
-			
+		if runContext == "Client" then
+			log(1, "setup() cannot be called on the client!")
+			return
 		end
+		
+		local eventsFolder: Folder = Instance.new("Folder")
+		eventsFolder.Name = EVENTS_FOLDER_NAME
+		eventsFolder.Parent = game.ReplicatedStorage
 	end,
 	
 	newCastNode = function(metadata: Metadata) : CastNode
