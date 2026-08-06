@@ -94,8 +94,7 @@ end
 
 --# used in `on server` events to replace sender & recipient values
 --# bc we cannot trust the client
---# TODO: do we even need the header for on server events..
-local function overwriteHeader(header: Header, player: Player) : Header
+local function secureHeader(header: Header, player: Player) : Header
 	header.sender = player.Name
 	header.recipient = "Server"
 	return header
@@ -255,9 +254,7 @@ Net = {
 		
 		if runContext == "Server" then
 			self.instance.OnServerEvent:Connect(function(player: Player, header: Header, payload: Payload)
-				overwriteHeader(header, player)
-				
-				--# TODO: note that we might have to create a header right here idk
+				secureHeader(header, player)
 				self.onCast:Fire(header, payload)
 			end)
 		elseif runContext == "Client" then
