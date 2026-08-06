@@ -75,26 +75,14 @@ type self = Net
 
 --# for dynamic use, each param is optional, but will be validated again anyway
 local function createHeader(sender: string, recipient: string) : Header
-	if sender then
-		expect("string", sender)
-	end
-	
-	if recipient then
-		expect("string", recipient)
-	end
+	expect("string", sender)
+	expect("string", recipient)
 	
 	local newHeader: Header = {
 		sender = sender,
 		recipient = recipient,
 		timestamp = workspace:GetServerTimeNow()
 	}
-	
-	if sender == nil or recipient == nil then
-		log(1, "Sender and recipent cannot be nil", "Creating header", {
-			{ "sender", tostring(sender) },
-			{ "recipient", tostring(recipient) }
-		})
-	end
 	
 	return newHeader
 end
