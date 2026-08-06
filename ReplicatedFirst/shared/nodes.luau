@@ -8,10 +8,9 @@ export type Header = {
 export type Payload = { [string]: any }
 
 return {
-	nodeA = net.newNode({
+	nodeA = net.newCastNode({
 		name = "NodeA",
+		rateLimit = 1,
 		reliable = true,
-		returns = true,
-		throttle = 1
-	} :: net.NodeMetadata) :: net.RequestNode
+	})
 }
