@@ -175,8 +175,8 @@ CastNodeTable = {
 			table.insert(playerNamesList, player.Name)
 		end
 		local playerNamesConcat: string = table.concat(playerNamesList, ", ")
-		local header: Header = createHeader("Server", playerNamesConcat)
 		
+		local header: Header = createHeader("Server", playerNamesConcat)
 		for _, player: Player in targetPlayers do
 			self.instance:FireClient(player, header, payload)
 		end
@@ -194,6 +194,9 @@ CastNodeTable = {
 		end
 		
 		local randomPlayer: Player = players[math.random(1, # players)]
+		if not randomPlayer then
+			log(4, "Anycast dropped (select player failed)")
+		end
 		
 		local header: Header = createHeader("Server", randomPlayer.Name)
 		self.instance:FireClient(randomPlayer, header, payload)
