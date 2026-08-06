@@ -116,8 +116,8 @@ local CastNodeTable: CastNode?
 CastNodeTable = {
 	--## Client -> Server ##--
 	
-	cast = function(self: CastNode, payload: Payload)
-		expectClient()
+	Cast = function(self: CastNode, payload: Payload)
+		expectClient("Cast()")
 		validatePayload(payload)
 		
 		local header: Header = createHeader(game.Players.LocalPlayer.Name, "Server")
