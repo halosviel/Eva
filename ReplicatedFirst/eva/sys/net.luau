@@ -202,9 +202,19 @@ CastNodeTable = {
 	Multicast = function(self: CastNode, targetPlayers: { Player }, payload: nodeTypes.Payload)
 		expectServer("Multicast()")
 		expect("table", targetPlayers)
-		for _, player: Player in targetPlayers do
-			expect("Player", player)
+		
+		for i: number, player: Player in targetPlayers do
+			if typeof(i) ~= "number" then
+				log(1, "Cannot have a non-number key in an array", "Reading from `targetPlayers`", {{ "invalidKey", tostring(i) }})
+				return
+			end
+ 			expect("Player", player)
 		end
+		if #targetPlayers == 0 then
+			log(1, "`targetPlayers` cannot be empty")
+			return
+		end
+		
 		validatePayload(payload)
 		
 		local playerNamesList: { string } = {}

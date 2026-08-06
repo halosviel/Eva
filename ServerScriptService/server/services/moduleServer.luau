@@ -21,8 +21,17 @@ return {
 	end,
 	
 	ready = function(self: self)
-		nodes.nodeA.onCast:Connect(function(player: Player, header: nodeTypes.Header, payload: nodeTypes.MyPayload)
-			warn("server received", header, payload)
+		task.spawn(function()
+			for i = 3, 0, -1 do
+				print("starting in", i)
+				task.wait(1)
+			end
+			
+			warn("server sent")
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
 		end)
 	end,
 }

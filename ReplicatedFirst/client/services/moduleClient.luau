@@ -21,10 +21,8 @@ return {
 	end,
 	
 	ready = function(self: self)
-		warn("client sent")
-		nodes.nodeA:Cast({
-			value1 = true,
-			value2 = false
-		} :: nodeTypes.MyPayload)
+		nodes.nodeA.onCast:Connect(function(header: nodeTypes.Header, payload: nodeTypes.MyPayload)
+			warn("client received", header, payload)
+		end)
 	end,
 }
