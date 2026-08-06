@@ -162,7 +162,18 @@ CastNodeTable = {
 	
 	--# to selected players
 	Multicast = function(self: CastNode, targetPlayers: { Player }, payload: Payload)
+		expectServer()
+		expect("table", targetPlayers)
+		for _, player: Player in targetPlayers do
+			expect("Player", player)
+		end
+		validatePayload(payload)
 		
+		local playerNames: string = table.concat(targetPlayers, ", ")
+		local header: Header = createHeader("Server", playerNames)
+		for _, player: Player in targetPlayers do
+			self.instance:FireClient(player, header, payload)
+		end
 	end,
 	
 	--# to everyone
