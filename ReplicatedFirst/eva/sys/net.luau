@@ -89,7 +89,7 @@ local function createHeader(sender: string, recipient: string) : Header
 end
 
 --# REMINDER FOR ME: `payload` is a hashmap.
-local function validatePayload(payload: string)
+local function validatePayload(payload: Payload)
 	expect("table", payload, "Payload must be a table")
 	
 	for key: string, _: any in payload do
