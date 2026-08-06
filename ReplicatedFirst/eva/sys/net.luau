@@ -286,10 +286,27 @@ Net = {
 		
 		--## Create Node ##--
 		
-		local instanceName: string = metadata.reliable == true and "RemoteEvent" or "UnreliableRemoteEvent"
-		local instance: RemoteEvent | UnreliableRemoteEvent = Instance.new(instanceName)
-		instance.Name = metadata.name
-		instance.Parent = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
+		local instance: RemoteEvent | UnreliableRemoteEvent
+		if runContext == "Server" then
+			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
+			if eventsFolder:FindFirstChild(metadata.name) then
+				log(1, `RemoteEvent {metadata.name} already exists`, "Building events folder")
+				return
+			end
+			
+			local instanceType: string = metadata.reliable == true and "RemoteEvent" or "UnreliableRemoteEvent"
+			instance = Instance.new(instanceType)
+			instance.Name = metadata.name
+			instance.Parent = eventsFolder
+		elseif runContext == "Client" then
+			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
+			if eventsFolder:FindFirstChild(metadata.name) then
+				--# server already errored
+				return
+			end
+			
+			instance = eventsFolder:WaitForChild(metadata.name)
+		end
 		
 		local self: CastNode = setmetatable({
 			instance = instance,
