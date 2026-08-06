@@ -29,7 +29,7 @@ local EVENTS_FOLDER_NAME = "events"
 local expect = require("./expect")
 local log = require("./log")
 
-local nodeTypes = require("@self/nodeTypes")
+local nodeTypes = require("@game/ReplicatedFirst/client/types/nodes")
 local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
 
 --## Variables ##--
@@ -39,7 +39,7 @@ local runContext: string = game.RunService:IsServer() and "Server" or "Client"
 --## Types ##--
 
 --# this type is used for both nodes
-type Metadata = {
+export type Metadata = {
 	name: string,
 	rateLimit: number?,
 	reliable: boolean?
@@ -49,6 +49,7 @@ type CastNode = {
 	instance: RemoteEvent | UnreliableRemoteEvent,
 	metadata: Metadata,
 	onCast: signal.Signal,
+	Cast: ( self: CastNode, payload: nodeTypes.Payload ) -> nil,
 	Unicast: ( self: CastNode, targetPlayer: Player, payload: nodeTypes.Payload ) -> nil,
 	Broadcast: ( self: CastNode, payload: nodeTypes.Payload ) -> nil,
 	Multicast: ( self: CastNode, targetPlayers: { Player }, payload: nodeTypes.Payload ) -> nil,
@@ -137,7 +138,7 @@ local function validatePayloadInsecure(payload: nodeTypes.Payload?) : boolean
 	end
 	
 	for key: string?, _: any in payload do
-		if key ~= "string" then
+		if typeof(key) ~= "string" then
 			return false
 		end
 	end
@@ -302,21 +303,26 @@ Net = {
 		} :: CastNode, CastNodeTable)
 		
 		--## Event Handling ##--
+		--#  probs not safe to print flagged header/payload due to
+		--#  possibility of large string spam
 		
 		if runContext == "Server" then
 			self.instance.OnServerEvent:Connect(function(player: Player, header: nodeTypes.Header, payload: nodeTypes.Payload)
 				local isHeaderValid: boolean = validateHeaderInsecure(header)
 				if isHeaderValid == false then
+					log(4, "Cast entry dropped (Invalid header)")
 					return
 				end
 				
 				local isPayloadValid: boolean = validatePayloadInsecure(payload)
-				if not isPayloadValid then
+				if isPayloadValid == false then
+					
+					log(4, "Cast entry dropped (Invalid payload)")
 					return
 				end
 				
 				secureHeader(header, player)
-				self.onCast:Fire(header, payload)
+				self.onCast:Fire(player, header, payload)
 			end)
 		elseif runContext == "Client" then
 			self.instance.OnClientEvent:Connect(function(header: nodeTypes.Header, payload: nodeTypes.Payload)

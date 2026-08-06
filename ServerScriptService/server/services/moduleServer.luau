@@ -8,6 +8,7 @@
 ]=]
 
 local nodes = require("@game/ReplicatedFirst/shared/nodes")
+local nodeTypes = require("@game/ReplicatedFirst/client/types/nodes")
 
 local types = require("../types/services")
 type self = types.Module
@@ -20,7 +21,8 @@ return {
 	end,
 	
 	ready = function(self: self)
-		task.wait(2)
-		nodes.nodeA:Unicast(game.Players.halosviel, {})
+		nodes.nodeA.onCast:Connect(function(player: Player, header: nodeTypes.Header, payload: nodeTypes.MyPayload)
+			warn("server received", header, payload)
+		end)
 	end,
 }
