@@ -17,6 +17,8 @@ local EVENTS_FOLDER_NAME = "events"
 local expect = require("./expect")
 local log = require("./log")
 
+local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
+
 
 --## Variables ##--
 
@@ -52,10 +54,16 @@ type self = Net
 
 --## OOP Setup ##--
 
-local CastNodeTable = {}
+local CastNodeTable: CastNode?
+CastNodeTable = {
+	
+}
 CastNodeTable.__index = CastNodeTable
 
-local RequestNodeTable = {}
+local RequestNodeTable: RequestNode?
+RequestNodeTable = {
+	
+}
 RequestNodeTable.__index = RequestNodeTable
 
 
