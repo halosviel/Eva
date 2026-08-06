@@ -14,6 +14,8 @@
 	
 	The system is inspired from the Internet Protocol, where a packet/datagram contains a `header`
 	and a `payload`. It also follows the API of the `Packet` library, albeit a bit differently.
+	The header exists to transport information that all event listeners would want to receive. A
+	good example of this is the timestamp.
 	
 	[NOTES]
 	- There is no lifecycle handling for the node objects - they are events!
@@ -131,13 +133,18 @@ CastNodeTable = {
 		validatePayload(payload)
 		
 		local header: Header = createHeader(game.Players.LocalPlayer.Name, "Server")
-		self.instance:FireServer(payload)
+		self.instance:FireServer(header, payload)
 	end,
 	
 	--## Server ##--
 	
-	Unicast = function(self: CastNode, payload: Payload)
+	Unicast = function(self: CastNode, targetPlayer: Player, payload: Payload)
+		expectServer()
+		expect("Player", targetPlayer)
+		validatePayload()
 		
+		local header: Header = createHeader("Server", targetPlayer.Name)
+		self.instance:FireClient(payload)
 	end,
 	
 	Broadcast = function(self: CastNode, payload: Payload)
