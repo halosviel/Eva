@@ -29,6 +29,7 @@ local EVENTS_FOLDER_NAME = "events"
 local expect = require("./expect")
 local log = require("./log")
 
+local nodeTypes = require("@self/nodeTypes")
 local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
 
 --## Variables ##--
@@ -36,15 +37,6 @@ local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
 local runContext: string = game.RunService:IsServer() and "Server" or "Client"
 
 --## Types ##--
-
-export type Header = {
-	sender: string,
-	recipient: string,
-	timestamp: number
-}
-export type Payload = { [string]: any }
-
--->
 
 --# this type is used for both nodes
 type Metadata = {
@@ -57,10 +49,10 @@ type CastNode = {
 	instance: RemoteEvent | UnreliableRemoteEvent,
 	metadata: Metadata,
 	onCast: signal.Signal,
-	Unicast: ( self: CastNode, targetPlayer: Player, payload: Payload ) -> nil,
-	Broadcast: ( self: CastNode, payload: Payload ) -> nil,
-	Multicast: ( self: CastNode, targetPlayers: { Player }, payload: Payload ) -> nil,
-	Anycast: ( self: CastNode, payload: Payload ) -> nil
+	Unicast: ( self: CastNode, targetPlayer: Player, payload: nodeTypes.Payload ) -> nil,
+	Broadcast: ( self: CastNode, payload: nodeTypes.Payload ) -> nil,
+	Multicast: ( self: CastNode, targetPlayers: { Player }, payload: nodeTypes.Payload ) -> nil,
+	Anycast: ( self: CastNode, payload: nodeTypes.Payload ) -> nil
 }
 
 type RequestNode = {
@@ -78,11 +70,11 @@ type self = Net
 --## Helper Functions ##--
 
 --# for dynamic use, each param is optional, but will be validated again anyway
-local function createHeader(sender: string, recipient: string) : Header
+local function createHeader(sender: string, recipient: string) : nodeTypes.Header
 	expect("string", sender)
 	expect("string", recipient)
 	
-	local newHeader: Header = {
+	local newHeader: nodeTypes.Header = {
 		sender = sender,
 		recipient = recipient,
 		timestamp = workspace:GetServerTimeNow()
@@ -94,14 +86,14 @@ end
 
 --# used in `on server` events to replace sender & recipient values
 --# bc we cannot trust the client
-local function secureHeader(header: Header, player: Player) : Header
+local function secureHeader(header: nodeTypes.Header, player: Player) : nodeTypes.Header
 	header.sender = player.Name
 	header.recipient = "Server"
 	return header
 end
 
---# REMINDER FOR ME: `payload` is a hashmap.
-local function validatePayload(payload: Payload)
+--# REMINDER FOR ME: `payload` is a hashmap AND can be empty.
+local function validatePayload(payload: nodeTypes.Payload)
 	expect("table", payload, "Payload must be a table")
 	
 	for key: string, _: any in payload do
@@ -110,7 +102,7 @@ local function validatePayload(payload: Payload)
 end
 
 --# check if client-sent header is safe (server only)
-local function validateHeaderInsecure(header: Header?) : boolean
+local function validateHeaderInsecure(header: nodeTypes.Header?) : boolean
 	if typeof(header) ~= "table" then
 		return false
 	end
@@ -139,7 +131,7 @@ local function validateHeaderInsecure(header: Header?) : boolean
 end
 
 --# check if client-sent payload is safe (server only)
-local function validatePayloadInsecure(payload: Payload?) : boolean
+local function validatePayloadInsecure(payload: nodeTypes.Payload?) : boolean
 	if typeof(payload) ~= "table" then
 		return false
 	end
@@ -172,11 +164,11 @@ local CastNodeTable: CastNode?
 CastNodeTable = {
 	--## Client -> Server ##--
 	
-	Cast = function(self: CastNode, payload: Payload)
+	Cast = function(self: CastNode, payload: nodeTypes.Payload)
 		expectClient("Cast()")
 		validatePayload(payload)
 		
-		local header: Header = createHeader(game.Players.LocalPlayer.Name, "Server")
+		local header: nodeTypes.Header = createHeader(game.Players.LocalPlayer.Name, "Server")
 		self.instance:FireServer(header, payload)
 	end,
 	
@@ -187,26 +179,26 @@ CastNodeTable = {
 	--# `recipient` entry in the header if needed, i guess
 	
 	--# To one player
-	Unicast = function(self: CastNode, targetPlayer: Player, payload: Payload)
+	Unicast = function(self: CastNode, targetPlayer: Player, payload: nodeTypes.Payload)
 		expectServer("Unicast()")
 		expect("Player", targetPlayer)
 		validatePayload(payload)
 		
-		local header: Header = createHeader("Server", targetPlayer.Name)
+		local header: nodeTypes.Header = createHeader("Server", targetPlayer.Name)
 		self.instance:FireClient(targetPlayer, header, payload)
 	end,
 	
 	--# To everyone
-	Broadcast = function(self: CastNode, payload: Payload)
+	Broadcast = function(self: CastNode, payload: nodeTypes.Payload)
 		expectServer("Broadcast()")
 		validatePayload(payload)
 		
-		local header: Header = createHeader("Server", "All Players")
+		local header: nodeTypes.Header = createHeader("Server", "All Players")
 		self.instance:FireAllClients(header, payload)
 	end,
 	
 	--# To selected players
-	Multicast = function(self: CastNode, targetPlayers: { Player }, payload: Payload)
+	Multicast = function(self: CastNode, targetPlayers: { Player }, payload: nodeTypes.Payload)
 		expectServer("Multicast()")
 		expect("table", targetPlayers)
 		for _, player: Player in targetPlayers do
@@ -220,7 +212,7 @@ CastNodeTable = {
 		end
 		local playerNamesConcat: string = table.concat(playerNamesList, ", ")
 		
-		local header: Header = createHeader("Server", playerNamesConcat)
+		local header: nodeTypes.Header = createHeader("Server", playerNamesConcat)
 		for _, player: Player in targetPlayers do
 			self.instance:FireClient(player, header, payload)
 		end
@@ -228,7 +220,7 @@ CastNodeTable = {
 	
 	--# To random player
 	--# TODO: retry behaviour?
-	Anycast = function(self: CastNode, payload: Payload)
+	Anycast = function(self: CastNode, payload: nodeTypes.Payload)
 		expectServer("Anycast()")
 		validatePayload(payload)
 		
@@ -244,7 +236,7 @@ CastNodeTable = {
 			return
 		end
 		
-		local header: Header = createHeader("Server", randomPlayer.Name)
+		local header: nodeTypes.Header = createHeader("Server", randomPlayer.Name)
 		self.instance:FireClient(randomPlayer, header, payload)
 	end,
 }
@@ -312,7 +304,7 @@ Net = {
 		--## Event Handling ##--
 		
 		if runContext == "Server" then
-			self.instance.OnServerEvent:Connect(function(player: Player, header: Header, payload: Payload)
+			self.instance.OnServerEvent:Connect(function(player: Player, header: nodeTypes.Header, payload: nodeTypes.Payload)
 				local isHeaderValid: boolean = validateHeaderInsecure(header)
 				if isHeaderValid == false then
 					return
@@ -327,7 +319,7 @@ Net = {
 				self.onCast:Fire(header, payload)
 			end)
 		elseif runContext == "Client" then
-			self.instance.OnClientEvent:Connect(function(header: Header, payload: Payload)
+			self.instance.OnClientEvent:Connect(function(header: nodeTypes.Header, payload: nodeTypes.Payload)
 				self.onCast:Fire(header, payload)
 			end)
 		end

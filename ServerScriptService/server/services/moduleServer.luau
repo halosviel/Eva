@@ -20,6 +20,7 @@ return {
 	end,
 	
 	ready = function(self: self)
-		--nodes.nodeA:UniCast()
+		task.wait(2)
+		nodes.nodeA:Unicast(game.Players.halosviel, {})
 	end,
 }

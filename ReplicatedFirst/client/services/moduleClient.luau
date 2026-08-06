@@ -20,6 +20,8 @@ return {
 	end,
 	
 	ready = function(self: self)
-		
+		nodes.nodeA.onCast:Connect(function()
+			
+		end)
 	end,
 }
