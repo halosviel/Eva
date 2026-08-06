@@ -82,6 +82,7 @@ local function createHeader(sender: string, recipient: string) : Header
 		sender = sender,
 		recipient = recipient,
 		timestamp = workspace:GetServerTimeNow()
+		--# add new header values here. make sure to update the `Header` type above ^^
 	}
 	
 	return newHeader
