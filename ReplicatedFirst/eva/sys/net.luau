@@ -6,6 +6,17 @@
 	[DESCRIPTION]
 	Third prototype for Eva's networking system. Fixes a lot of problems from the old version
 	by splitting cast and request nodes into two different objects.
+	
+	This module aims to pivot from the default instance-based event system, where pointers are
+	hardcoded and organisation becomes hefty with scale. It also provides built-in functionality
+	like rate limiting, which can become a repetetive endeavour. You can also edit this module
+	and implement your own custom functionality.
+	
+	The system is inspired from the Internet Protocol, where a packet/datagram contains a `header`
+	and a `payload`. It also follows the API of the `Packet` library, albeit a bit differently.
+	
+	[NOTES]
+	- There is no lifecycle handling for the node objects - they are events!
 ]=]
 
 --## Config ##--
@@ -19,13 +30,20 @@ local log = require("./log")
 
 local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
 
-
 --## Variables ##--
 
 local runContext: string = game.RunService:IsServer() and "Server" or "Client"
 
-
 --## Types ##--
+
+export type Header = {
+	sender: string,
+	recipient: string,
+	timestamp: number
+}
+export type Payload = { [string]: any }
+
+-->
 
 --# this type is used for both nodes
 type Metadata = {
@@ -36,7 +54,8 @@ type Metadata = {
 
 type CastNode = {
 	instance: RemoteEvent | UnreliableRemoteEvent,
-	metadata: Metadata
+	metadata: Metadata,
+	onCast: signal.Signal
 }
 
 type RequestNode = {
@@ -51,12 +70,85 @@ type Net = {
 }
 type self = Net
 
+--## Helper Functions ##--
+
+--# for dynamic use, each param is optional, but will be validated again anyway
+local function createHeader(sender: string?, recipient: string?) : Header
+	if sender then
+		expect("string", sender)
+	end
+	
+	if recipient then
+		expect("string", recipient)
+	end
+	
+	local newHeader: Header = {
+		sender = sender,
+		recipient = recipient,
+		timestamp = workspace:GetServerTimeNow()
+	}
+	
+	if sender == nil or recipient == nil then
+		log(1, "Sender cannot be nil", "Creating header", {
+			{ "sender", tostring(sender) },
+			{ "recipient", tostring(recipient) }
+		})
+	end
+	
+	return newHeader
+end
+
+local function validatePayload(payload: string)
+	expect("table", payload, "Payload must be a table")
+	
+	for _, data: { string } in payload do
+		expect("table", data, "Data in payload must be a table")
+		
+		for _, value: string in data do
+			expect("string", value, "All values in a data table must be a string")
+		end
+	end
+end
+
+local function expectServer(callbackName: string)
+	if runContext ~= "Server" then
+		log(1, `\`{callbackName}\` cannot be called on the client`)
+	end
+end
+
+local function expectClient(callbackName: string)
+	if runContext ~= "Client" then
+		log(1, `\`{callbackName}\` cannot be called on the server`)
+	end
+end
 
 --## OOP Setup ##--
 
 local CastNodeTable: CastNode?
 CastNodeTable = {
+	--## Client ##--
 	
+	cast = function(self: self, payload: Payload)
+		
+	end,
+	
+	--## Server ##--
+	
+	Unicast = function(self: self, payload: Payload)
+		
+	end,
+	
+	Broadcast = function(self: self, payload: Payload)
+
+	end,
+	
+	Multicast = function(self: self, payload: Payload)
+
+	end,
+	
+	Anycast = function(self: self, payload: Payload)
+
+	end,
 }
 CastNodeTable.__index = CastNodeTable
 
@@ -65,7 +157,6 @@ RequestNodeTable = {
 	
 }
 RequestNodeTable.__index = RequestNodeTable
-
 
 --## Net ##--
 
@@ -87,6 +178,8 @@ Net = {
 	end,
 	
 	newCastNode = function(metadata: Metadata) : CastNode
+		
+		--## Validation ##--
 		if runContext == "Client" then
 			return
 		end
@@ -99,6 +192,8 @@ Net = {
 			expect("number", metadata.rateLimit)
 		end
 		
+		--## Create Node ##--
+		
 		local instanceName: string = metadata.reliable == true and "RemoteEvent" or "UnreliableRemoteEvent"
 		local instance: RemoteEvent | UnreliableRemoteEvent = Instance.new(instanceName)
 		instance.Name = metadata.name
@@ -106,8 +201,22 @@ Net = {
 		
 		local self: CastNode = setmetatable({
 			instance = instance,
-			metadata = metadata
+			metadata = metadata,
+			onCast = signal.new()
 		} :: CastNode, CastNodeTable)
+		
+		--## Event Handling ##--
+		
+		if runContext == "Server" then
+			self.instance.OnServerEvent:Connect(function(player: Player, header: Header, payload: Payload)
+				--# TODO: note that we might have to create a header right here idk
+				self.onCast:Fire(header, payload)
+			end)
+		elseif runContext == "Client" then
+			self.instance.OnClientEvent:Connect(function(header: Header, payload: Payload)
+				self.onCast:Fire(header, payload)
+			end)
+		end
 		
 		return self
 	end,
