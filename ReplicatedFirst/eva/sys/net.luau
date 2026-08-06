@@ -96,7 +96,7 @@ Net = {
 		instance.Name = metadata.name
 		instance.Parent = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 		
-		local self = setmetatable({
+		local self: CastNode = setmetatable({
 			instance = instance,
 			metadata = metadata
 		} :: CastNode, CastNodeTable)
