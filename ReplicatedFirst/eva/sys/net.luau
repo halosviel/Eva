@@ -234,10 +234,6 @@ Net = {
 	newCastNode = function(metadata: Metadata) : CastNode
 		--## Validation ##--
 		
-		if runContext == "Client" then
-			return
-		end
-		
 		expect("table", metadata)
 		expect("string", metadata.name)
 		expect("boolean", metadata.reliable)
@@ -276,9 +272,8 @@ Net = {
 	end,
 	
 	newRequestNode = function(metadata: Metadata) : RequestNode
-		if runContext == "Client" then
-			return
-		end
+		
+		--## Validation ##--
 		
 		expect("table", metadata)
 		expect("string", metadata.name)
@@ -286,6 +281,8 @@ Net = {
 		if metadata.rateLimit ~= nil then
 			expect("number", metadata.rateLimit)
 		end
+		
+		--## Create Node ##--
 		
 		local instance: RemoteFunction = Instance.new("RemoteFunction")
 		instance.Name = metadata.name
@@ -295,6 +292,10 @@ Net = {
 			instance = instance,
 			metadata = metadata
 		} :: RequestNode, RequestNodeTable)
+		
+		--## Event Handling ##--
+		
+		
 		
 		return self
 	end,
