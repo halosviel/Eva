@@ -137,16 +137,21 @@ CastNodeTable = {
 	
 	--## Server -> Client ##--
 	--# (selective casting)
+	--# 
+	--# client can infer which cast type was used based on the
+	--# `recipient` entry in the header if needed, i guess
 	
+	--# to one player
 	Unicast = function(self: CastNode, targetPlayer: Player, payload: Payload)
 		expectServer()
 		expect("Player", targetPlayer)
 		validatePayload(payload)
 		
 		local header: Header = createHeader("Server", targetPlayer.Name)
-		self.instance:FireClient(header, payload)
+		self.instance:FireClient(targetPlayer, header, payload)
 	end,
 	
+	--# to everyone
 	Broadcast = function(self: CastNode, payload: Payload)
 		expectServer()
 		validatePayload(payload)
@@ -155,10 +160,12 @@ CastNodeTable = {
 		self.instance:FireAllClients(header, payload)
 	end,
 	
-	Multicast = function(self: CastNode, payload: Payload)
+	--# to selected players
+	Multicast = function(self: CastNode, targetPlayers: { Player }, payload: Payload)
 		
 	end,
 	
+	--# to everyone
 	Anycast = function(self: CastNode, payload: Payload)
 
 	end,
