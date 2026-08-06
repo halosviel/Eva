@@ -7,5 +7,4 @@ export type SessionLogD = {
 	ready: ( self: SessionLogD ) -> nil
 }
 
-
 return {}

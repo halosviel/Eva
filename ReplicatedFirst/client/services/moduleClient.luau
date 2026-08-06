@@ -20,12 +20,6 @@ return {
 	end,
 	
 	ready = function(self: self)
-		warn("client sent")
-		nodes.nodeA:request({
-			entry1 = "These",
-			entry2 = "are",
-			entry3 = "client",
-			entry4 = "params",
-		})
+		
 	end,
 }

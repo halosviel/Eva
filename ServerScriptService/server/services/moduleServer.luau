@@ -20,12 +20,6 @@ return {
 	end,
 	
 	ready = function(self: self)
-		nodes.nodeA.onRequest:Connect(function(player: Player, header: nodes.Header, payload: nodes.Payload) : { message1: string, message2: string}
-			warn("server received", header, payload)
-			return {
-				message1 = "Server params",
-				message2 = "Ws in the chat"
-			}
-		end)
+		
 	end,
 }

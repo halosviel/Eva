@@ -13,12 +13,5 @@ return {
 		reliable = true,
 		returns = true,
 		throttle = 1
-	} :: net.NodeMetadata) :: net.RequestNode,
-	
-	nodeB = net.newNode({
-		name = "NodeB",
-		reliable = true,
-		returns = false,
-		throttle = 0
-	} :: net.NodeMetadata) :: net.CastNode
+	} :: net.NodeMetadata) :: net.RequestNode
 }
