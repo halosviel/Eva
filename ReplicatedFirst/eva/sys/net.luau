@@ -183,6 +183,7 @@ CastNodeTable = {
 	end,
 	
 	--# To random player
+	--# TODO: retry behaviour?
 	Anycast = function(self: CastNode, payload: Payload)
 		expectServer("Anycast()")
 		validatePayload(payload)
@@ -196,6 +197,7 @@ CastNodeTable = {
 		local randomPlayer: Player = players[math.random(1, # players)]
 		if not randomPlayer then
 			log(4, "Anycast dropped (select player failed)")
+			return
 		end
 		
 		local header: Header = createHeader("Server", randomPlayer.Name)
