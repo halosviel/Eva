@@ -74,7 +74,7 @@ type self = Net
 --## Helper Functions ##--
 
 --# for dynamic use, each param is optional, but will be validated again anyway
-local function createHeader(sender: string?, recipient: string?) : Header
+local function createHeader(sender: string, recipient: string) : Header
 	if sender then
 		expect("string", sender)
 	end
@@ -90,7 +90,7 @@ local function createHeader(sender: string?, recipient: string?) : Header
 	}
 	
 	if sender == nil or recipient == nil then
-		log(1, "Sender cannot be nil", "Creating header", {
+		log(1, "Sender and recipent cannot be nil", "Creating header", {
 			{ "sender", tostring(sender) },
 			{ "recipient", tostring(recipient) }
 		})
