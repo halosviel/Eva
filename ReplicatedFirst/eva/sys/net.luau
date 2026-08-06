@@ -141,7 +141,7 @@ CastNodeTable = {
 	--# client can infer which cast type was used based on the
 	--# `recipient` entry in the header if needed, i guess
 	
-	--# to one player
+	--# To one player
 	Unicast = function(self: CastNode, targetPlayer: Player, payload: Payload)
 		expectServer()
 		expect("Player", targetPlayer)
@@ -151,7 +151,7 @@ CastNodeTable = {
 		self.instance:FireClient(targetPlayer, header, payload)
 	end,
 	
-	--# to everyone
+	--# To everyone
 	Broadcast = function(self: CastNode, payload: Payload)
 		expectServer()
 		validatePayload(payload)
@@ -160,7 +160,9 @@ CastNodeTable = {
 		self.instance:FireAllClients(header, payload)
 	end,
 	
-	--# to selected players
+	--# To selected players
+	--# If client needs to see if the cast was a multicast, they can use
+	--# string find on "Multicast" in the `recipient` entry
 	Multicast = function(self: CastNode, targetPlayers: { Player }, payload: Payload)
 		expectServer()
 		expect("table", targetPlayers)
@@ -169,14 +171,13 @@ CastNodeTable = {
 		end
 		validatePayload(payload)
 		
-		local playerNames: string = table.concat(targetPlayers, ", ")
-		local header: Header = createHeader("Server", playerNames)
+		local header: Header = createHeader("Server", `{game.Players.LocalPlayer.Name} (Multicast)`)
 		for _, player: Player in targetPlayers do
 			self.instance:FireClient(player, header, payload)
 		end
 	end,
 	
-	--# to everyone
+	--# To random player
 	Anycast = function(self: CastNode, payload: Payload)
 
 	end,
