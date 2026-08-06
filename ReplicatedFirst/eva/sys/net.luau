@@ -65,8 +65,8 @@ type RequestNode = {
 
 type Net = {
 	setup: () -> nil,
-	newCastNode: ( self: self ) -> CastNode,
-	newRequestNode: ( self: self ) -> RequestNode
+	newCastNode: ( self: Net ) -> CastNode,
+	newRequestNode: ( self: Net ) -> RequestNode
 }
 type self = Net
 
@@ -123,30 +123,31 @@ local function expectClient(callbackName: string)
 end
 
 --## OOP Setup ##--
+--# constructor functions are in the Net section below
 
 local CastNodeTable: CastNode?
 CastNodeTable = {
 	--## Client ##--
 	
-	cast = function(self: self, payload: Payload)
+	cast = function(self: CastNode, payload: Payload)
 		
 	end,
 	
 	--## Server ##--
 	
-	Unicast = function(self: self, payload: Payload)
+	Unicast = function(self: CastNode, payload: Payload)
 		
 	end,
 	
-	Broadcast = function(self: self, payload: Payload)
+	Broadcast = function(self: CastNode, payload: Payload)
 
 	end,
 	
-	Multicast = function(self: self, payload: Payload)
+	Multicast = function(self: CastNode, payload: Payload)
 
 	end,
 	
-	Anycast = function(self: self, payload: Payload)
+	Anycast = function(self: CastNode, payload: Payload)
 
 	end,
 }
@@ -178,8 +179,8 @@ Net = {
 	end,
 	
 	newCastNode = function(metadata: Metadata) : CastNode
-		
 		--## Validation ##--
+		
 		if runContext == "Client" then
 			return
 		end
