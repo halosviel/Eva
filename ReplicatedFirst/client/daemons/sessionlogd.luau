@@ -79,7 +79,7 @@ return {
 			con = nil
 			
 			local playtime: number = math.floor(os.clock() - startTimestamp)
-			print(`Goodbye! | Played for {playtime}s`)
+			print(`Goodbye! Played for {playtime}s`)
 		end)
 	end,
 }

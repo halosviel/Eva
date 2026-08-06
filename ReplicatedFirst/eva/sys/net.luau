@@ -57,7 +57,7 @@ type CastNode = {
 	instance: RemoteEvent | UnreliableRemoteEvent,
 	metadata: Metadata,
 	onCast: signal.Signal,
-	UniCast: ( self: CastNode, targetPlayer: Player, payload: Payload ) -> nil,
+	Unicast: ( self: CastNode, targetPlayer: Player, payload: Payload ) -> nil,
 	Broadcast: ( self: CastNode, payload: Payload ) -> nil,
 	Multicast: ( self: CastNode, targetPlayers: { Player }, payload: Payload ) -> nil,
 	Anycast: ( self: CastNode, payload: Payload ) -> nil
@@ -276,12 +276,12 @@ Net = {
 	newCastNode = function(metadata: Metadata) : CastNode
 		--## Validation ##--
 		
-		expect("table", metadata)
-		expect("string", metadata.name)
-		expect("boolean", metadata.reliable)
+		expect("table", metadata, "`metadata` must be a table")
+		expect("string", metadata.name, "`name` must be a string")
+		expect("boolean", metadata.reliable, "`reliable` must be a boolean")
 		
 		if metadata.rateLimit ~= nil then
-			expect("number", metadata.rateLimit)
+			expect("number", metadata.rateLimit, "`rateLimit` must be a number")
 		end
 		
 		--## Create Node ##--
@@ -290,7 +290,7 @@ Net = {
 		if runContext == "Server" then
 			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 			if eventsFolder:FindFirstChild(metadata.name) then
-				log(1, `RemoteEvent {metadata.name} already exists`, "Building events folder")
+				log(1, `Instance {metadata.name} already exists`, "Building events folder")
 				return
 			end
 			
@@ -300,11 +300,6 @@ Net = {
 			instance.Parent = eventsFolder
 		elseif runContext == "Client" then
 			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
-			if eventsFolder:FindFirstChild(metadata.name) then
-				--# server already errored
-				return
-			end
-			
 			instance = eventsFolder:WaitForChild(metadata.name)
 		end
 		
@@ -344,8 +339,8 @@ Net = {
 		
 		--## Validation ##--
 		
-		expect("table", metadata)
-		expect("string", metadata.name)
+		expect("table", metadata, "`metadata` must be a table")
+		expect("string", metadata.name, "`metadata` must contain a string `name`")
 		
 		if metadata.rateLimit ~= nil then
 			expect("number", metadata.rateLimit)
