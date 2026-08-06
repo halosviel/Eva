@@ -4,10 +4,12 @@
 	created: 2026 July 12
 	
 	[DESCRIPTION]
-	Module for validating variables. Meant to replace assert.
+	Module for validating variables. Meant to improve asserts that expect specific
+	data types. Also comes with an extra context param for readability.
+	
 	If the query does not match any of the given types, it will throw a type error.
 	
-	Fixes a few issues from Pip's params module. Now you can use the "|" separator
+	Fixes a few issues from Pip's `params` module. Now you can use the `|` separator
 	(inspired by Unix's Grep) in the query instead of a different function, and
 	include an optional context string to pass to the Log module.
 ]=]
