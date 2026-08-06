@@ -144,11 +144,10 @@ CastNodeTable = {
 		validatePayload()
 		
 		local header: Header = createHeader("Server", targetPlayer.Name)
-		self.instance:FireClient(payload)
+		self.instance:FireClient(header, payload)
 	end,
 	
 	Broadcast = function(self: CastNode, payload: Payload)
-
 	end,
 	
 	Multicast = function(self: CastNode, payload: Payload)
