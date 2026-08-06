@@ -21,6 +21,11 @@
 local SEPARATOR = "==>" --# the beginning string at the start of a new line
 local INFO_LEVEL = 3 --# how deep debug.info will initially search
 
+type CodeInfo = {
+	title: string,
+	callback: ( ...any ) -> any
+}
+
 local codes = require("@self/codes")
 
 --# taken from Pip :P
@@ -50,7 +55,7 @@ return function(code: number, header: string, context: string?, fields: { { stri
 	local codeStr: string = tostring(code)
 	assert(typeof(code) == "number", `[!] Given \`code\` was not a number (got {typeof(code)})`)
 	
-	local codeInfo: codes.CodeInfo? = codes[code]
+	local codeInfo: CodeInfo? = codes[code]
 	if codeInfo == nil then
 		error(`[!] No code info found for code {codeStr}`)
 	end

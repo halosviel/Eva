@@ -1,8 +1,3 @@
-export type CodeInfo = {
-	title: string,
-	callback: ( ...any ) -> any
-}
-
 return {
 	[1] = {
 		title = "Code Error",

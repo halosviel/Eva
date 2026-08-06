@@ -179,7 +179,19 @@ CastNodeTable = {
 	
 	--# To random player
 	Anycast = function(self: CastNode, payload: Payload)
-
+		expectServer()
+		validatePayload(payload)
+		
+		local players: { Player } = game.Players:GetPlayers()
+		if #players == 0 then
+			log(4, "Anycast dropped (No players)")
+			return
+		end
+		
+		local randomPlayer: Player = players[math.random(1, # players)]
+		
+		local header: Header = createHeader("Server", randomPlayer.Name)
+		self.instance:FireClient(randomPlayer, header, payload)
 	end,
 }
 CastNodeTable.__index = CastNodeTable
