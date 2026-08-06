@@ -109,6 +109,48 @@ local function validatePayload(payload: Payload)
 	end
 end
 
+--# check if client-sent header is safe (server only)
+local function validateHeaderInsecure(header: Header?) : boolean
+	if typeof(header) ~= "table" then
+		return false
+	end
+	
+	if typeof(header.sender) ~= "string" then
+		return false
+	end
+	
+	if typeof(header.recipient) ~= "string" then
+		return false
+	end
+	
+	if typeof(header.timestamp) ~= "number" then
+		return false
+	end
+	
+	if math.isnan(header.timestamp) then
+		return false
+	end
+	
+	if header.timestamp < 0 then
+		return false
+	end
+	
+	return true
+end
+
+--# check if client-sent payload is safe (server only)
+local function validatePayloadInsecure(payload: Payload?) : boolean
+	if typeof(payload) ~= "table" then
+		return false
+	end
+	
+	for key: string?, _: any in payload do
+		if key ~= "string" then
+			return false
+		end
+	end
+end
+
 local function expectServer(callbackName: string)
 	if runContext ~= "Server" then
 		log(1, `\`{callbackName}\` cannot be called on the client`)
@@ -259,6 +301,16 @@ Net = {
 		
 		if runContext == "Server" then
 			self.instance.OnServerEvent:Connect(function(player: Player, header: Header, payload: Payload)
+				local isHeaderValid: boolean = validateHeaderInsecure(header)
+				if isHeaderValid == false then
+					return
+				end
+				
+				local isPayloadValid: boolean = validatePayloadInsecure(payload)
+				if not isPayloadValid then
+					return
+				end
+				
 				secureHeader(header, player)
 				self.onCast:Fire(header, payload)
 			end)
