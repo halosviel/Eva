@@ -98,15 +98,12 @@ local function createHeader(sender: string?, recipient: string?) : Header
 	return newHeader
 end
 
+--# REMINDER FOR ME: `payload` is a hashmap.
 local function validatePayload(payload: string)
 	expect("table", payload, "Payload must be a table")
 	
-	for _, data: { string } in payload do
-		expect("table", data, "Data in payload must be a table")
-		
-		for _, value: string in data do
-			expect("string", value, "All values in a data table must be a string")
-		end
+	for key: string, _: any in payload do
+		expect("string", key, "The keys of data in a payload must be a string")
 	end
 end
 
@@ -130,7 +127,11 @@ CastNodeTable = {
 	--## Client ##--
 	
 	cast = function(self: CastNode, payload: Payload)
+		expectClient()
+		validatePayload(payload)
 		
+		local header: Header = createHeader(game.Players.LocalPlayer.Name, "Server")
+		self.instance:FireServer(payload)
 	end,
 	
 	--## Server ##--
