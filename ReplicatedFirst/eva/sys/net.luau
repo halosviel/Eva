@@ -141,13 +141,14 @@ CastNodeTable = {
 	Unicast = function(self: CastNode, targetPlayer: Player, payload: Payload)
 		expectServer()
 		expect("Player", targetPlayer)
-		validatePayload()
+		validatePayload(payload)
 		
 		local header: Header = createHeader("Server", targetPlayer.Name)
 		self.instance:FireClient(header, payload)
 	end,
 	
 	Broadcast = function(self: CastNode, payload: Payload)
+		
 	end,
 	
 	Multicast = function(self: CastNode, payload: Payload)
