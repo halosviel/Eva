@@ -92,6 +92,15 @@ local function createHeader(sender: string, recipient: string) : Header
 	return newHeader
 end
 
+--# used in `on server` events to replace sender & recipient values
+--# bc we cannot trust the client
+--# TODO: do we even need the header for on server events..
+local function overwriteHeader(header: Header, player: Player) : Header
+	header.sender = player.Name
+	header.recipient = "Server"
+	return header
+end
+
 --# REMINDER FOR ME: `payload` is a hashmap.
 local function validatePayload(payload: Payload)
 	expect("table", payload, "Payload must be a table")
@@ -246,6 +255,8 @@ Net = {
 		
 		if runContext == "Server" then
 			self.instance.OnServerEvent:Connect(function(player: Player, header: Header, payload: Payload)
+				overwriteHeader(header, player)
+				
 				--# TODO: note that we might have to create a header right here idk
 				self.onCast:Fire(header, payload)
 			end)
