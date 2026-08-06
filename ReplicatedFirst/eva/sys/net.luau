@@ -8,6 +8,10 @@
 	by splitting cast and request nodes into two different objects.
 ]=]
 
+--## Config ##--
+
+local EVENTS_FOLDER_NAME = "events"
+
 --## Imports ##--
 
 local expect = require("./expect")
@@ -66,6 +70,7 @@ Net = {
 			--## Server Setup ##--
 			
 			local eventsFolder: Folder = Instance.new("Folder")
+			eventsFolder.Name = EVENTS_FOLDER_NAME
 			eventsFolder.Parent = game.ReplicatedStorage
 		else
 			--## Client Setup ##--
@@ -73,9 +78,9 @@ Net = {
 		end
 	end,
 	
-	newCastNode = function(self: self, metadata: Metadata) : CastNode
+	newCastNode = function(metadata: Metadata) : CastNode
 		if runContext == "Client" then
-			log(1, "`newCastNode()` can only be called on the server!")
+			return
 		end
 		
 		expect("table", metadata)
@@ -88,18 +93,20 @@ Net = {
 		
 		local instanceName: string = metadata.reliable == true and "RemoteEvent" or "UnreliableRemoteEvent"
 		local instance: RemoteEvent | UnreliableRemoteEvent = Instance.new(instanceName)
+		instance.Name = metadata.name
+		instance.Parent = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 		
-		local castNode: CastNode = setmetatable({
+		local self = setmetatable({
 			instance = instance,
 			metadata = metadata
 		} :: CastNode, CastNodeTable)
 		
-		return castNode
+		return self
 	end,
 	
-	newRequestNode = function(self: self, metadata: Metadata)
+	newRequestNode = function(metadata: Metadata) : RequestNode
 		if runContext == "Client" then
-			log(1, "`newRequestNode()` can only be called on the server!")
+			return
 		end
 		
 		expect("table", metadata)
@@ -110,12 +117,15 @@ Net = {
 		end
 		
 		local instance: RemoteFunction = Instance.new("RemoteFunction")
-		local requestNode: RequestNode = setmetatable({
+		instance.Name = metadata.name
+		instance.Parent = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
+		
+		local self: RequestNode = setmetatable({
 			instance = instance,
 			metadata = metadata
 		} :: RequestNode, RequestNodeTable)
-
-		return requestNode
+		
+		return self
 	end,
 }
 
