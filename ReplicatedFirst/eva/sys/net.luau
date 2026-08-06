@@ -162,8 +162,6 @@ CastNodeTable = {
 	end,
 	
 	--# To selected players
-	--# If client needs to see if the cast was a multicast, they can use
-	--# string find on "Multicast" in the `recipient` entry
 	Multicast = function(self: CastNode, targetPlayers: { Player }, payload: Payload)
 		expectServer("Multicast()")
 		expect("table", targetPlayers)
@@ -172,7 +170,13 @@ CastNodeTable = {
 		end
 		validatePayload(payload)
 		
-		local header: Header = createHeader("Server", `{game.Players.LocalPlayer.Name} (Multicast)`)
+		local playerNamesList: { string } = {}
+		for _, player: Player in targetPlayers do
+			table.insert(playerNamesList, player.Name)
+		end
+		local playerNamesConcat: string = table.concat(playerNamesList, ", ")
+		local header: Header = createHeader("Server", playerNamesConcat)
+		
 		for _, player: Player in targetPlayers do
 			self.instance:FireClient(player, header, payload)
 		end
