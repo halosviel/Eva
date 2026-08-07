@@ -286,6 +286,7 @@ RequestNodeTable = {
 	end,
 	
 	--# NOTE: `payload.player` must exist if invoking from the server!!!
+	--# also `player` is not removed from the server's invoke payload
 	request = function(self: RequestNode, payload: nodeTypes.Payload & nodeTypes.ServerRequestNodePayload)
 		validatePayload(payload)
 		if runContext == "Server" and not (typeof(payload.player) == "Instance" and payload.player:IsA("Player")) then
