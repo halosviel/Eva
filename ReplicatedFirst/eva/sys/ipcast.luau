@@ -108,6 +108,7 @@ end
 --# REMINDER FOR ME: `payload` is a hashmap AND can be empty.
 local function validatePayload(payload: nodeTypes.Payload)
 	expect("table", payload, "Payload must be a table")
+	
 	for key: string, _: any in payload do
 		expect("string", key, "The keys of data in a payload must be a string")
 	end
@@ -414,7 +415,6 @@ IPCast = {
 	
 	--# basically duplicate code from above
 	newRequestNode = function(metadata: Metadata) : RequestNode
-		
 		--## Validation ##--
 		
 		expect("table", metadata, "`metadata` must be a table")
