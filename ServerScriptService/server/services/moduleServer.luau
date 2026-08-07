@@ -32,6 +32,317 @@ return {
 				value1 = true,
 				value2 = false
 			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
+			nodes.nodeA:Broadcast({
+				value1 = true,
+				value2 = false
+			} :: nodeTypes.MyPayload)
+			task.wait(0.1)
 		end)
 	end,
 }

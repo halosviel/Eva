@@ -51,6 +51,7 @@ export type Metadata = {
 type CastNode = {
 	instance: RemoteEvent | UnreliableRemoteEvent,
 	metadata: Metadata,
+	lastCast: number,
 	onCast: signal.Signal,
 	Cast: ( self: CastNode, payload: nodeTypes.Payload ) -> nil,
 	Unicast: ( self: CastNode, targetPlayer: Player, payload: nodeTypes.Payload ) -> nil,
@@ -62,6 +63,7 @@ type CastNode = {
 type RequestNode = {
 	instance: RemoteFunction,
 	metadata: Metadata,
+	lastRequest: number,
 	callback: ( player: Player, header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil
 }
 
@@ -146,6 +148,18 @@ local function validatePayloadInsecure(payload: nodeTypes.Payload?) : boolean
 			return false
 		end
 	end
+end
+
+local function handleRateLimit(node: CastNode | RequestNode) : boolean
+	local entryName: string = node.instance == "RemoteFunction"  and "lastRequest" or "lastCast"
+	local lastTriggered: number = node[entryName]
+	local isRateLimited: boolean = (os.clock() - lastTriggered < node.metadata.rateLimit) and node.metadata.rateLimit > 0
+	
+	if not isRateLimited then
+		node[entryName] = os.clock()
+	end
+	
+	return isRateLimited
 end
 
 local function expectServer(callbackName: string)
@@ -315,6 +329,7 @@ Net = {
 		local self: CastNode = setmetatable({
 			instance = instance,
 			metadata = metadata,
+			lastCast = os.clock(),
 			onCast = signal.new()
 		} :: CastNode, CastNodeTable)
 		
@@ -336,11 +351,22 @@ Net = {
 					return
 				end
 				
+				--# this block is duplicated like 4 times btw
+				local isRateLimited: boolean = handleRateLimit(self)
+				if isRateLimited then
+					return
+				end
+				
 				secureHeader(header, player)
 				self.onCast:Fire(player, header, payload)
 			end)
 		elseif runContext == "Client" then
 			self.instance.OnClientEvent:Connect(function(header: nodeTypes.Header, payload: nodeTypes.Payload)
+				local isRateLimited: boolean = handleRateLimit(self)
+				if isRateLimited then
+					return
+				end
+				
 				self.onCast:Fire(header, payload)
 			end)
 		end
@@ -384,6 +410,7 @@ Net = {
 		local self: RequestNode = setmetatable({
 			instance = instance,
 			metadata = metadata,
+			lastRequest = os.clock(),
 			callback = nil
 		} :: RequestNode, RequestNodeTable)
 		
@@ -403,11 +430,21 @@ Net = {
 					return
 				end
 				
+				local isRateLimited: boolean = handleRateLimit(self)
+				if isRateLimited then
+					return
+				end
+				
 				secureHeader(header, player)
 				return self.callback(player, header, payload)
 			end
 		elseif runContext == "Client" then
 			self.instance.OnClientInvoke = function(header: nodeTypes.Header, payload: nodeTypes.Payload) : ( nodeTypes.Header, nodeTypes.Payload )
+				local isRateLimited: boolean = handleRateLimit(self)
+				if isRateLimited then
+					return
+				end
+				
 				return self.callback(header, payload)
 			end
 		end
