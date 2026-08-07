@@ -33,12 +33,12 @@
 
 --## CONFIG ##--
 
-local DEFAULT_MILESTONES = { 5, 15, 30, 60, 120, 300, 600, 1000 }
+local DEFAULT_MILESTONES = {1, 2, 3, 5, 10} --{ 5, 15, 30, 60, 120, 300, 600, 1000 }
 
 --## IMPORTS ##--
 
-local class = require("./class")
-local expect = require("./expect")
+local class = require("@game/ReplicatedFirst/eva/sys/class")
+local expect = require("@game/ReplicatedFirst/eva/sys/expect")
 local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
 
 --## TYPES ##--
@@ -130,7 +130,7 @@ return class {
 					
 					if self.config.milestones[index] == nil then
 						if self.config.log == true then
-							warn(`Process \`{self.config.name}\` timed out ({self.config.milestones[index - 1] or "?"}s)`)
+							warn(`Process \`{self.config.name}\` timed out`)
 						end
 						self:Destroy()
 						return

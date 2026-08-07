@@ -29,7 +29,7 @@
 
 local expect = require("./expect")
 local log = require("./log")
-local processClock = require("./processClock")
+local processClock = require("@game/ReplicatedFirst/eva/packages/processClock")
 
 type Module = {
 	dependencies: { string },

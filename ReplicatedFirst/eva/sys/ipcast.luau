@@ -309,6 +309,8 @@ RequestNodeTable = {
 		
 		local header: nodeTypes.Header = createHeader(sender, recipient)
 		if runContext == "Server" then
+			--# TODO start timer
+			
 			local responsePayload: nodeTypes.Payload = self.instance:InvokeClient(payload.player, header, payload)
 			local responseHeader: nodeTypes.Header = createHeader(payload.player.Name, "Server")
 			return responseHeader, responsePayload
