@@ -4,36 +4,54 @@
 	created: 2026 July 15
 	
 	[DESCRIPTION]
-	A rewrite of Pip's processTimer module.
+	A rewrite and successor of Pip's `processTimer` module.
 	
-	The module allows scripts to create a class, which as long
-	as it is alive, will push warns across milestones indicating
-	that a process is still running and taking longer than expected.
+	Allows scripts to create a class, which as long as it is alive,
+	will push warns across numbered milestones indicating that a process
+	is still running and taking longer than expected.
 	
 	[USAGE]
 	```
 	local clock: processClock.ProcessClock
-	clock = processClock.new("myProcessClock", function()
-		clock = nil
-	end)
+	clock = processClock.new({
+		name = "myProcessClock",
+		callback = function()
+			clock = nil
+		end,
+		milestones = {5, 10, 15}, --# optional
+		log = true				  --# optional, default true
+	})
 	```
 	
 	[NOTES]
-	- The second parameter is the on-finish/Destroy callback.
 	- The class can be destroyed mid-execution :D
-	- The callback is not pcalled. It assumes that the caller is just
-	  setting the object to nil (what more are you to do when a
-	  timer finishes anyway?).
+	- The callback must set the object to nil!!!
+	- The callback is not pcalled! It assumes that the caller is just
+	  setting the object to nil (what more are you to do when a time
+	  finishes anyway?).
 ]=]
+
+--## CONFIG ##--
+
+local DEFAULT_MILESTONES = { 5, 15, 30, 60, 120, 300, 600, 1000 }
+
+--## IMPORTS ##--
 
 local class = require("./class")
 local expect = require("./expect")
 local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
 
-type self = {
-	MILESTONES: { number },
+--## TYPES ##--
+
+export type Config = {
 	name: string,
 	callback: () -> nil,
+	milestones: { number }?,
+	log: boolean
+}
+
+type self = {
+	config: Config,
 	startTimestamp: number,
 	thread: thread,
 	destroyed: boolean,
@@ -44,15 +62,30 @@ type self = {
 }
 export type ProcessClock = self
 
+--## PROCESS CLOCK ##--
+
 return class {
-	new = function(self: self, name: string, callback: () -> nil)
-		expect("string", name)
-		expect("function", callback)
+	new = function(self: self, config: Config)
+		expect("table", config)
+		expect("string", config.name)
+		expect("function", config.callback)
 		
-		self.MILESTONES = { 5, 15, 30, 60, 120, 300, 600, 1000 }
+		if config.milestones then
+			expect("table", config.milestones)
+			for _, value: number in config.milestones do
+				expect("number", value)
+			end
+		else
+			config.milestones = DEFAULT_MILESTONES
+		end
 		
-		self.name = name
-		self.callback = callback
+		if config.log ~= nil then
+			expect("boolean", config.log)
+		else
+			config.log = true
+		end
+		
+		self.config = config
 		
 		self.startTimestamp = os.clock()
 		self.thread = nil
@@ -71,7 +104,7 @@ return class {
 			self.onUpdate = nil
 		end
 		
-		self.callback()
+		self.config.callback()
 	end,
 	
 	ready = function(self: self)
@@ -89,12 +122,16 @@ return class {
 				self.onUpdate:Fire(elapsed)
 				
 				--# clanker warns of drift, but i doubt it
-				if elapsed == self.MILESTONES[index] then
-					warn(`Process \`{self.name}\` taking longer than usual ({self.MILESTONES[index]}s)`)
+				if elapsed == self.config.milestones[index] then
+					if self.config.log == true then
+						warn(`Process \`{self.config.name}\` taking longer than usual ({self.config.milestones[index]}s)`)
+					end
 					index += 1
 					
-					if self.MILESTONES[index] == nil then
-						warn(`Process \`{self.name}\` timed out ({self.MILESTONES[index - 1] or "?"}s)`)
+					if self.config.milestones[index] == nil then
+						if self.config.log == true then
+							warn(`Process \`{self.config.name}\` timed out ({self.config.milestones[index - 1] or "?"}s)`)
+						end
 						self:Destroy()
 						return
 					end
