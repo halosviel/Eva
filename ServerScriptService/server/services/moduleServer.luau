@@ -37,6 +37,11 @@ return {
 			local header: nodeTypes.Header, payload: nodeTypes.Payload = nodes.nodeB:Request({
 				player = game.Players.halosviel
 			} :: nodeTypes.Payload & nodeTypes.ServerRequestNodePayload)
+			if header == nil or payload == nil then
+				warn("server received - invalid params", header, payload)
+				return
+			end
+			
 			warn("server received", header, payload)
 			
 			--[[nodes.nodeB:onRequest(function(player, header, payload)

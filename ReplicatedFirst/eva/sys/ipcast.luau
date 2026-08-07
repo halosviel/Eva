@@ -39,6 +39,7 @@ local log = require("./log")
 
 local nodeTypes = require("@game/ReplicatedFirst/client/types/nodes")
 local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
+local processClock = require("@game/ReplicatedFirst/eva/packages/processClock")
 
 --## GLOBALS ##--
 
@@ -309,13 +310,53 @@ RequestNodeTable = {
 		
 		local header: nodeTypes.Header = createHeader(sender, recipient)
 		if runContext == "Server" then
-			--# TODO start timer
+			local _processClock: processClock.ProcessClock
+			_processClock = processClock.new({
+				name = `IPCast_Request_{payload.player.Name}`,
+				callback = function()
+					_processClock = nil
+				end,
+			} :: processClock.Config)
 			
-			local responsePayload: nodeTypes.Payload = self.instance:InvokeClient(payload.player, header, payload)
-			local responseHeader: nodeTypes.Header = createHeader(payload.player.Name, "Server")
+			local returnNow: boolean = false
+			local responsePayload: nodeTypes.Payload
+			local responseHeader: nodeTypes.Header
+			
+			_processClock.onUpdate:Connect(function(elapsed: number)
+				if elapsed >= self.metadata.timeout then
+					warn("timed out")
+					returnNow = true
+				end
+			end)
+			
+			task.spawn(function()
+				responsePayload = self.instance:InvokeClient(payload.player, header, payload)
+				if responsePayload == nil then
+					log(4, "Client returned request node with a `nil` value", "in OnServerInvoke")
+				else
+					responseHeader = createHeader(payload.player.Name, "Server")
+				end
+				
+				--# header & payload are nil
+				returnNow = true
+			end)
+			
+			while returnNow == false do
+				task.wait()
+			end
+			
+			_processClock:Destroy()
+			_processClock = nil
+			
 			return responseHeader, responsePayload
 		elseif runContext == "Client" then
+			--# no protection sincee server code should not be buns
+			
 			local responsePayload: nodeTypes.Payload = self.instance:InvokeServer(header, payload)
+			if responsePayload == nil then
+				log(4, "Server returned request node with a `nil` value", "in OnServerInvoke")
+			end
+			
 			local responseHeader: nodeTypes.Header = createHeader("Server", game.Players.LocalPlayer.Name)
 			return responseHeader, responsePayload
 		end

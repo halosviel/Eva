@@ -28,6 +28,7 @@ return {
 		nodes.nodeB:onRequest(function(header: nodeTypes.Header, payload: nodeTypes.Payload)
 			warn("client received", header, payload)
 			warn("client sent")
+			
 			return {
 				fromClient = true
 			}

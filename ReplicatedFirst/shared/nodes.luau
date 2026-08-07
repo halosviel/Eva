@@ -11,5 +11,6 @@ return {
 	nodeB = ipcast.newRequestNode({
 		name = "NodeB",
 		rateLimit = 1,
+		timeout = 6
 	} :: ipcast.Metadata)
 }
