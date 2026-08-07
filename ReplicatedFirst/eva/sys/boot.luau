@@ -64,9 +64,12 @@ return function(root: Folder)
 	--## Start process clock ##--
 	
 	local clock: processClock.ProcessClock
-	clock = processClock.new("Boot", function()
-		clock = nil
-	end)
+	clock = processClock.new({
+		name = "Boot",
+		callback = function()
+			clock = nil
+		end
+	})
 	
 	local startTimestamp: number = os.clock()
 	
