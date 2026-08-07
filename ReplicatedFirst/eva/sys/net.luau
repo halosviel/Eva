@@ -11,10 +11,12 @@
 	hardcoded and organisation becomes hefty with scale. It also provides built-in functionality
 	like rate limiting and selective casting.
 	
-	The system is inspired from the Internet Protocol, where a packet/datagram contains a `header`
-	and a `payload`. It also follows the API of the `Packet` library, albeit a bit differently.
-	The header exists to transport information that all event listeners would want to receive. A
-	good example of this is the timestamp.
+	The system is inspired from the Internet Protocol, where all event listeners are passed a `header`
+	and a `payload` (and `player` for the server). It also follows the API of the `Packet` library
+	with the use of the `nodes` module. The header exists to transport information that all event
+	listeners would want to receive, such as the timestamp.
+	
+	The term `node` refers to both `cast nodes` (RemoteEvents) and `request nodes` (RemoteFunctions).
 	
 	[NOTES]
 	- There is no lifecycle handling for the node objects - they are events!
@@ -257,7 +259,9 @@ CastNodeTable.__index = CastNodeTable
 
 local RequestNodeTable: RequestNode?
 RequestNodeTable = {
-	
+	onRequest = function(self: RequestNode, callback: () -> nil)
+		self.callback = callback
+	end,
 }
 RequestNodeTable.__index = RequestNodeTable
 
