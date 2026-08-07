@@ -46,6 +46,8 @@ return {
 					fromServer = true
 				}
 			end)]]
+			
+			nodes.nodeB:request()
 		end)
 	end,
 }

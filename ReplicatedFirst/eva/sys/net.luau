@@ -21,6 +21,7 @@
 	[NOTES]
 	- There is no lifecycle handling for the node objects - they are events!
 	- Cannot have 2 nodes of any type with the same name.
+	- Types are not perfect.
 ]=]
 
 --## Config ##--
@@ -65,9 +66,10 @@ type RequestNode = {
 	instance: RemoteFunction,
 	metadata: Metadata,
 	lastRequest: number,
-	callback: ( player: Player, header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil,
-	onRequest: ( self: RequestNode, callback: ( header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil ) -> nil,
-	request: ( self: RequestNode, payload: nodeTypes.Payload) -> nil
+	--# note: missing player type for server for 2 types underneath but idrc
+	callback: ( header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil,
+	onRequest: ( self: RequestNode, callback: ( header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil) -> nil,
+	Request: ( self: RequestNode, payload: nodeTypes.Payload) -> ( nodeTypes.Header, nodeTypes.Payload )
 }
 
 type Net = {
@@ -151,20 +153,24 @@ local function validatePayloadInsecure(payload: nodeTypes.Payload?) : boolean
 			return false
 		end
 	end
+	
+	return true
 end
 
 local function handleRateLimit(node: CastNode | RequestNode) : boolean
+	if node.metadata.rateLimit == 0 then
+		return false
+	end
+	
 	local entryName: string = node.instance:IsA("RemoteFunction") and "lastRequest" or "lastCast"
 	local lastTriggered: number = node[entryName]
 	
-	local isRateLimited: boolean = (os.clock() - lastTriggered < node.metadata.rateLimit) and node.metadata.rateLimit > 0
+	local isRateLimited: boolean = os.clock() - lastTriggered < node.metadata.rateLimit
 	
 	if not isRateLimited then
 		node[entryName] = os.clock()
-	else
-		if PRINT_RATE_LIMITS then
-			print(`rate limited node {node.metadata.name}`)
-		end
+	elseif PRINT_RATE_LIMITS then
+		print(`rate limited node {node.metadata.name}`)
 	end
 	
 	return isRateLimited
@@ -282,12 +288,16 @@ local RequestNodeTable: RequestNode?
 RequestNodeTable = {
 	onRequest = function(self: RequestNode, callback: ( header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil)
 		expect("function", callback)
+		if self.callback ~= nil then
+			log("1", "Attempt to overwrite exising request callback", "in onRequest()")
+			return
+		end
 		self.callback = callback
 	end,
 	
 	--# NOTE: `payload.player` must exist if invoking from the server!!!
 	--# also `player` is not removed from the server's invoke payload
-	request = function(self: RequestNode, payload: nodeTypes.Payload & nodeTypes.ServerRequestNodePayload)
+	Request = function(self: RequestNode, payload: nodeTypes.Payload & nodeTypes.ServerRequestNodePayload)
 		validatePayload(payload)
 		if runContext == "Server" and not (typeof(payload.player) == "Instance" and payload.player:IsA("Player")) then
 			log(1, "`player` entry in `payload` must be a Player", "Firing request node to client", {{ "got", tostring(payload.player)}})
@@ -384,7 +394,7 @@ Net = {
 				
 				--# this block is duplicated like 4 times btw
 				local isRateLimited: boolean = handleRateLimit(self)
-				if isRateLimited then
+				if isRateLimited == true then
 					return
 				end
 				
@@ -394,7 +404,7 @@ Net = {
 		elseif runContext == "Client" then
 			self.instance.OnClientEvent:Connect(function(header: nodeTypes.Header, payload: nodeTypes.Payload)
 				local isRateLimited: boolean = handleRateLimit(self)
-				if isRateLimited then
+				if isRateLimited == true then
 					return
 				end
 				
@@ -458,7 +468,7 @@ Net = {
 				end
 				
 				local isRateLimited: boolean = handleRateLimit(self)
-				if isRateLimited then
+				if isRateLimited == true then
 					return
 				end
 
@@ -473,7 +483,7 @@ Net = {
 		elseif runContext == "Client" then
 			self.instance.OnClientInvoke = function(header: nodeTypes.Header, payload: nodeTypes.Payload) : ( nodeTypes.Header, nodeTypes.Payload )
 				local isRateLimited: boolean = handleRateLimit(self)
-				if isRateLimited then
+				if isRateLimited == true then
 					return
 				end
 				
