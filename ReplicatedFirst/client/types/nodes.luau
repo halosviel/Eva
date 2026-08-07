@@ -7,6 +7,9 @@ export type Header = {
 }
 
 export type Payload = { [string]: any }
+export type ServerRequestNodePayload = {
+	player: Player
+}
 
 --## Game ##--
 

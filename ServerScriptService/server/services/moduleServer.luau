@@ -33,6 +33,12 @@ return {
 				value2 = false
 			} :: nodeTypes.MyPayload)
 			task.wait(0.1)]]
+			
+			local header: nodeTypes.Header, payload: nodeTypes.Payload = nodes.nodeB:request({
+				player = game.Players.halosviel
+			} :: nodeTypes.Payload & nodeTypes.ServerRequestNodePayload)
+			
+			warn("server received", header, payload)
 		end)
 	end,
 }

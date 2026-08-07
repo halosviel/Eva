@@ -24,5 +24,13 @@ return {
 		--[[nodes.nodeA.onCast:Connect(function(header: nodeTypes.Header, payload: nodeTypes.MyPayload)
 			warn("client received", header, payload)
 		end)]]
+		
+		nodes.nodeB:onRequest(function(header: nodeTypes.Header, payload: nodeTypes.Payload)
+			warn("client received", header, payload)
+			warn("client sent")
+			return {
+				fromClient = true
+			}
+		end)
 	end,
 }

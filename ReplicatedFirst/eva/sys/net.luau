@@ -65,7 +65,9 @@ type RequestNode = {
 	instance: RemoteFunction,
 	metadata: Metadata,
 	lastRequest: number,
-	callback: ( player: Player, header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil
+	callback: ( player: Player, header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil,
+	onRequest: ( self: RequestNode, callback: ( header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil ) -> nil,
+	request: ( self: RequestNode, payload: nodeTypes.Payload) -> nil
 }
 
 type Net = {
@@ -152,8 +154,9 @@ local function validatePayloadInsecure(payload: nodeTypes.Payload?) : boolean
 end
 
 local function handleRateLimit(node: CastNode | RequestNode) : boolean
-	local entryName: string = node.instance == "RemoteFunction"  and "lastRequest" or "lastCast"
+	local entryName: string = node.instance:IsA("RemoteFunction") and "lastRequest" or "lastCast"
 	local lastTriggered: number = node[entryName]
+	print(node)
 	local isRateLimited: boolean = (os.clock() - lastTriggered < node.metadata.rateLimit) and node.metadata.rateLimit > 0
 	
 	if not isRateLimited then
@@ -253,7 +256,6 @@ CastNodeTable = {
 	end,
 	
 	--# To random player
-	--# TODO: retry behaviour?
 	Anycast = function(self: CastNode, payload: nodeTypes.Payload)
 		expectServer("Anycast()")
 		validatePayload(payload)
@@ -278,8 +280,32 @@ CastNodeTable.__index = CastNodeTable
 
 local RequestNodeTable: RequestNode?
 RequestNodeTable = {
-	onRequest = function(self: RequestNode, callback: () -> nil)
+	onRequest = function(self: RequestNode, callback: ( header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil)
+		expect("function", callback)
 		self.callback = callback
+	end,
+	
+	--# NOTE: `payload.player` must exist if invoking from the server!!!
+	request = function(self: RequestNode, payload: nodeTypes.Payload & nodeTypes.ServerRequestNodePayload)
+		validatePayload(payload)
+		if runContext == "Server" and not (typeof(payload.player) == "Instance" and payload.player:IsA("Player")) then
+			log(1, "`player` entry in `payload` must be a Player", "Firing request node to client", {{ "got", tostring(payload.player)}})
+			return
+		end
+		
+		local sender: string = runContext == "Client" and game.Players.LocalPlayer.Name or "Server"
+		local recipient: string = runContext == "Client" and "Server" or payload.player.Name
+		
+		local header: nodeTypes.Header = createHeader(sender, recipient)
+		if runContext == "Server" then
+			local responsePayload: nodeTypes.Payload = self.instance:InvokeClient(payload.player, header, payload)
+			local responseHeader: nodeTypes.Header = createHeader(payload.player.Name, "Server")
+			return responseHeader, responsePayload
+		elseif runContext == "Client" then
+			local responsePayload: nodeTypes.Payload = self.instance:InvokeServer(header, payload)
+			local responseHeader: nodeTypes.Header = createHeader("Server", payload.player.Name)
+			return responseHeader, responsePayload
+		end
 	end,
 }
 RequestNodeTable.__index = RequestNodeTable
@@ -313,7 +339,7 @@ Net = {
 		end
 		
 		--## Create Node ##--
-
+		
 		local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 		local instance: RemoteEvent? | UnreliableRemoteEvent?
 		if runContext == "Server" then
@@ -434,6 +460,11 @@ Net = {
 				if isRateLimited then
 					return
 				end
+
+				if self.callback == nil then
+					log(1, "Client invoked a request node, but no callback was set to receive it", "in OnServerInvoke")
+					return
+				end
 				
 				secureHeader(header, player)
 				return self.callback(player, header, payload)
@@ -442,6 +473,11 @@ Net = {
 			self.instance.OnClientInvoke = function(header: nodeTypes.Header, payload: nodeTypes.Payload) : ( nodeTypes.Header, nodeTypes.Payload )
 				local isRateLimited: boolean = handleRateLimit(self)
 				if isRateLimited then
+					return
+				end
+				
+				if self.callback == nil then
+					log(1, "Server invoked a request node, but no callback was set to receive it", "in OnClientInvoke")
 					return
 				end
 				
