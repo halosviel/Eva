@@ -56,6 +56,7 @@ type self = {
 	thread: thread,
 	destroyed: boolean,
 	onUpdate: signal.Signal,
+	onMilestone: signal.Signal,
 	new: ( self: self ) -> nil,
 	Destroy: ( self: self ) -> nil,
 	ready: ( self: self ) -> nil
@@ -91,6 +92,7 @@ return class {
 		self.thread = nil
 		self.destroyed = false
 		self.onUpdate = signal.new()
+		self.onMilestone = signal.new()
 	end,
 	
 	Destroy = function(self: self)
@@ -102,6 +104,11 @@ return class {
 		if self.onUpdate then
 			self.onUpdate:Destroy()
 			self.onUpdate = nil
+		end
+		
+		if self.onMilestone then
+			self.onMilestone:Destroy()
+			self.onMilestone = nil
 		end
 		
 		self.config.callback()
@@ -126,6 +133,8 @@ return class {
 					if self.config.log == true then
 						warn(`Process \`{self.config.name}\` taking longer than usual ({self.config.milestones[index]}s)`)
 					end
+					
+					self.onMilestone:Fire(index)
 					index += 1
 					
 					if self.config.milestones[index] == nil then
