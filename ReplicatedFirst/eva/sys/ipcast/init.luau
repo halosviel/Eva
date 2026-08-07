@@ -298,6 +298,9 @@ RequestNodeTable = {
 	
 	--# NOTE: `payload.player` must exist if invoking from the server!!!
 	--# also `player` is not removed from the server's invoke payload
+	--#
+	--# Also no matter what happens, the header theoretically ***should***
+	--# always be there.
 	Request = function(self: RequestNode, payload: nodeTypes.Payload & nodeTypes.ServerRequestNodePayload)
 		validatePayload(payload)
 		if runContext == "Server" and not (typeof(payload.player) == "Instance" and payload.player:IsA("Player")) then
@@ -343,7 +346,6 @@ RequestNodeTable = {
 					log(4, "Client returned request node with a `nil` value", "in OnServerInvoke")
 				end
 				
-				--# header & payload are nil
 				returnNow = true
 			end)
 			
@@ -558,6 +560,7 @@ IPCast = {
 			end
 		end
 		
+		warn("return self", self.metadata.name)
 		return self
 	end,
 }
