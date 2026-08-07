@@ -50,7 +50,7 @@ export type Config = {
 	name: string,
 	callback: () -> nil,
 	milestones: { number }?,
-	log: boolean
+	log: boolean?
 }
 
 type self = {

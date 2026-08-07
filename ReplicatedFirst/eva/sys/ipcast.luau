@@ -320,7 +320,7 @@ RequestNodeTable = {
 			
 			local returnNow: boolean = false
 			local responsePayload: nodeTypes.Payload
-			local responseHeader: nodeTypes.Header
+			local responseHeader: nodeTypes.Header = createHeader(payload.player.Name, "Server")
 			
 			_processClock.onUpdate:Connect(function(elapsed: number)
 				if elapsed >= self.metadata.timeout then
@@ -330,11 +330,17 @@ RequestNodeTable = {
 			end)
 			
 			task.spawn(function()
-				responsePayload = self.instance:InvokeClient(payload.player, header, payload)
-				if responsePayload == nil then
+				--# can get an error if client leaves while this fires
+				local invokeFailed: boolean = false
+				xpcall(function()
+					responsePayload = self.instance:InvokeClient(payload.player, header, payload)
+				end, function(err: string)
+					log(4, "`InvokeClient()` call errored", _, {{ "err", err }})
+					invokeFailed = true
+				end)
+				
+				if responsePayload == nil and invokeFailed == false then
 					log(4, "Client returned request node with a `nil` value", "in OnServerInvoke")
-				else
-					responseHeader = createHeader(payload.player.Name, "Server")
 				end
 				
 				--# header & payload are nil
@@ -354,8 +360,16 @@ RequestNodeTable = {
 		elseif runContext == "Client" then
 			--# no protection since server code should not be buns
 			
-			local responsePayload: nodeTypes.Payload = self.instance:InvokeServer(header, payload)
-			if responsePayload == nil then
+			local responsePayload: nodeTypes.Payload
+			local invokeFailed: boolean = false
+			
+			xpcall(function()
+				responsePayload = self.instance:InvokeServer(header, payload)
+			end, function(err: string)
+				log(4, "InvokeServer() call errored")
+				invokeFailed = true
+			end)
+			if responsePayload == nil and invokeFailed == false then
 				log(4, "Server returned request node with a `nil` value", "in OnServerInvoke")
 			end
 			
