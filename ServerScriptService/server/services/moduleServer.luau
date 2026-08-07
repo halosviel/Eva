@@ -44,7 +44,7 @@ return {
 			
 			warn("server received", header, payload)
 			
-			--[[nodes.nodeB:onRequest(function(player, header, payload)
+			--[[nodes.nodeB:cuest(function(player, header, payload)
 				warn("server received", header, payload)
 				warn("server sent")
 				return {

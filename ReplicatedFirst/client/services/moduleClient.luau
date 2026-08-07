@@ -25,7 +25,7 @@ return {
 			warn("client received", header, payload)
 		end)]]
 		
-		nodes.nodeB:onRequest(function(header: nodeTypes.Header, payload: nodeTypes.Payload)
+		nodes.node:onRequest(function(header: nodeTypes.Header, payload: nodeTypes.Payload)
 			warn("client received", header, payload)
 			warn("client sent")
 			

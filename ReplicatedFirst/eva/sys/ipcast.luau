@@ -52,7 +52,7 @@ export type Metadata = {
 	name: string,
 	rateLimit: number?,
 	reliable: boolean?, --# cast node only
-	timeout: number? --# request node only
+	timeout: number?   --# request node only
 }
 
 type CastNode = {
@@ -162,7 +162,7 @@ local function validatePayloadInsecure(payload: nodeTypes.Payload?) : boolean
 end
 
 local function handleRateLimit(node: CastNode | RequestNode) : boolean
-	if node.metadata.rateLimit == 0 then
+	if node.metadata.rateLimit <= 0 then
 		return false
 	end
 	
@@ -290,7 +290,7 @@ RequestNodeTable = {
 	onRequest = function(self: RequestNode, callback: ( header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil)
 		expect("function", callback)
 		if self.callback ~= nil then
-			log("1", "Attempt to overwrite exising request callback", "in onRequest()")
+			log(1, "Attempt to overwrite existing request callback", "in onRequest()")
 			return
 		end
 		self.callback = callback
@@ -345,12 +345,14 @@ RequestNodeTable = {
 				task.wait()
 			end
 			
-			_processClock:Destroy()
-			_processClock = nil
+			if _processClock then
+				_processClock:Destroy()
+				_processClock = nil
+			end
 			
 			return responseHeader, responsePayload
 		elseif runContext == "Client" then
-			--# no protection sincee server code should not be buns
+			--# no protection since server code should not be buns
 			
 			local responsePayload: nodeTypes.Payload = self.instance:InvokeServer(header, payload)
 			if responsePayload == nil then
@@ -467,6 +469,10 @@ IPCast = {
 		
 		if metadata.rateLimit ~= nil then
 			expect("number", metadata.rateLimit, "`rateLimit` must be a number")
+		end
+		
+		if metadata.timeout ~= nil then
+			expect("number", metadata.timeout, "`timeout` must be a number")
 		end
 		
 		--## Create Node ##--
