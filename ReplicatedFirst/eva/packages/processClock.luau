@@ -21,6 +21,9 @@
 		milestones = {5, 10, 15}, --# optional
 		log = true				  --# optional, default true
 	})
+	
+	clock:Destroy()
+	clock = nil
 	```
 	
 	[NOTES]
@@ -141,6 +144,7 @@ return class {
 						if self.config.log == true then
 							warn(`Process \`{self.config.name}\` timed out`)
 						end
+						
 						self:Destroy()
 						return
 					end
