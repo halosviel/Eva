@@ -27,12 +27,12 @@
 	- Types are not perfect.
 ]=]
 
---## Config ##--
+--## CONFIG ##--
 
 local EVENTS_FOLDER_NAME = "events"
 local PRINT_RATE_LIMITS = true --# for debugging
 
---## Imports ##--
+--## IMPORTS ##--
 
 local expect = require("./expect")
 local log = require("./log")
@@ -40,16 +40,18 @@ local log = require("./log")
 local nodeTypes = require("@game/ReplicatedFirst/client/types/nodes")
 local signal = require("@game/ReplicatedFirst/eva/libs/cuteSignal")
 
---## Variables ##--
+--## GLOBALS ##--
 
 local runContext: string = game.RunService:IsServer() and "Server" or "Client"
 
---## Types ##--
+--## TYPES ##--
 
-export type Metadata = { --# this type is used for both nodes
+--# this type is used for both nodes
+export type Metadata = {
 	name: string,
 	rateLimit: number?,
-	reliable: boolean?
+	reliable: boolean?, --# cast node only
+	timeout: number? --# request node only
 }
 
 type CastNode = {
@@ -81,7 +83,7 @@ type IPCast = {
 }
 type self = IPCast
 
---## Helper Functions ##--
+--## HELPER FUNCTIONS ##--
 
 local function createHeader(sender: string, recipient: string) : nodeTypes.Header
 	expect("string", sender)
@@ -190,7 +192,7 @@ local function expectClient(callbackName: string)
 	end
 end
 
---## OOP Setup ##--
+--## OOP SETUP ##--
 --# constructor functions are in the IPCast section below
 
 local CastNodeTable: CastNode?
@@ -319,7 +321,7 @@ RequestNodeTable = {
 }
 RequestNodeTable.__index = RequestNodeTable
 
---## IPCast ##--
+--## IPCAST ##--
 
 local IPCast
 IPCast = {
