@@ -11,12 +11,15 @@
 	hardcoded and organisation becomes hefty with scale. It also provides built-in functionality
 	like rate limiting and selective casting.
 	
-	The system is inspired from the Internet Protocol, where all event listeners are passed a `header`
-	and a `payload` (and `player` for the server). It also follows the API of the `Packet` library
-	with the use of the `nodes` module. The header exists to transport information that all event
-	listeners would want to receive, such as the timestamp.
+	The system is inspired from the Internet Protocol (hence the name), where all event listeners
+	are passed a `header` and a `payload` (and `player` for the server). It also follows the API
+	of the `Packet` library with the use of the `nodes` module. The header exists to transport
+	information that all event listeners would want to receive, such as the timestamp.
 	
 	The term `node` refers to both `cast nodes` (RemoteEvents) and `request nodes` (RemoteFunctions).
+	
+	[USAGE]
+	See the `Usage` module parented to this script.
 	
 	[NOTES]
 	- There is no lifecycle handling for the node objects - they are events!
@@ -43,8 +46,7 @@ local runContext: string = game.RunService:IsServer() and "Server" or "Client"
 
 --## Types ##--
 
---# this type is used for both nodes
-export type Metadata = {
+export type Metadata = { --# this type is used for both nodes
 	name: string,
 	rateLimit: number?,
 	reliable: boolean?
@@ -72,16 +74,15 @@ type RequestNode = {
 	Request: ( self: RequestNode, payload: nodeTypes.Payload) -> ( nodeTypes.Header, nodeTypes.Payload )
 }
 
-type Net = {
+type IPCast = {
 	setup: () -> nil,
-	newCastNode: ( self: Net, metadata: Metadata ) -> CastNode,
-	newRequestNode: ( self: Net, Metadata: Metadata ) -> RequestNode
+	newCastNode: ( self: IPCast, metadata: Metadata ) -> CastNode,
+	newRequestNode: ( self: IPCast, Metadata: Metadata ) -> RequestNode
 }
-type self = Net
+type self = IPCast
 
 --## Helper Functions ##--
 
---# for dynamic use, each param is optional, but will be validated again anyway
 local function createHeader(sender: string, recipient: string) : nodeTypes.Header
 	expect("string", sender)
 	expect("string", recipient)
@@ -107,7 +108,6 @@ end
 --# REMINDER FOR ME: `payload` is a hashmap AND can be empty.
 local function validatePayload(payload: nodeTypes.Payload)
 	expect("table", payload, "Payload must be a table")
-	
 	for key: string, _: any in payload do
 		expect("string", key, "The keys of data in a payload must be a string")
 	end
@@ -166,7 +166,6 @@ local function handleRateLimit(node: CastNode | RequestNode) : boolean
 	local lastTriggered: number = node[entryName]
 	
 	local isRateLimited: boolean = os.clock() - lastTriggered < node.metadata.rateLimit
-	
 	if not isRateLimited then
 		node[entryName] = os.clock()
 	elseif PRINT_RATE_LIMITS then
@@ -191,7 +190,7 @@ local function expectClient(callbackName: string)
 end
 
 --## OOP Setup ##--
---# constructor functions are in the Net section below
+--# constructor functions are in the IPCast section below
 
 local CastNodeTable: CastNode?
 CastNodeTable = {
@@ -206,10 +205,8 @@ CastNodeTable = {
 	end,
 	
 	--## Server -> Client ##--
-	--# (selective casting)
-	--# 
-	--# client can infer which cast type was used based on the
-	--# `recipient` entry in the header if needed, i guess
+	--#  client can infer which cast type was used based on the
+	--#  `recipient` entry in the header if needed, i guess
 	
 	--# To one player
 	Unicast = function(self: CastNode, targetPlayer: Player, payload: nodeTypes.Payload)
@@ -321,10 +318,10 @@ RequestNodeTable = {
 }
 RequestNodeTable.__index = RequestNodeTable
 
---## Net ##--
+--## IPCast ##--
 
-local Net
-Net = {
+local IPCast
+IPCast = {
 	
 	--# called by client & server index scripts
 	setup = function()
@@ -415,7 +412,7 @@ Net = {
 		return self
 	end,
 	
-	--# basically duplicate code from above idc
+	--# basically duplicate code from above
 	newRequestNode = function(metadata: Metadata) : RequestNode
 		
 		--## Validation ##--
@@ -500,4 +497,4 @@ Net = {
 	end,
 }
 
-return Net
+return IPCast
