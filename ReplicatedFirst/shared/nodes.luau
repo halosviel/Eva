@@ -8,9 +8,8 @@ return {
 		reliable = true,
 	} :: net.Metadata),
 
-	nodeB = net.newCastNode({
+	nodeB = net.newRequestNode({
 		name = "NodeB",
 		rateLimit = 1,
-		reliable = true,
 	} :: net.Metadata)
 }

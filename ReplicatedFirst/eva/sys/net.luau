@@ -26,6 +26,7 @@
 --## Config ##--
 
 local EVENTS_FOLDER_NAME = "events"
+local PRINT_RATE_LIMITS = true --# for debugging
 
 --## Imports ##--
 
@@ -157,6 +158,10 @@ local function handleRateLimit(node: CastNode | RequestNode) : boolean
 	
 	if not isRateLimited then
 		node[entryName] = os.clock()
+	else
+		if PRINT_RATE_LIMITS then
+			print(`rate limited node {node.metadata.name}`)
+		end
 	end
 	
 	return isRateLimited
@@ -308,10 +313,10 @@ Net = {
 		end
 		
 		--## Create Node ##--
-		
-		local instance: RemoteEvent | UnreliableRemoteEvent
+
+		local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
+		local instance: RemoteEvent? | UnreliableRemoteEvent?
 		if runContext == "Server" then
-			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 			if eventsFolder:FindFirstChild(metadata.name) then
 				log(1, `Instance {metadata.name} already exists`, "Building events folder")
 				return
@@ -322,7 +327,6 @@ Net = {
 			instance.Name = metadata.name
 			instance.Parent = eventsFolder
 		elseif runContext == "Client" then
-			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 			instance = eventsFolder:WaitForChild(metadata.name)
 		end
 		
@@ -388,12 +392,9 @@ Net = {
 		
 		--## Create Node ##--
 		
-		local instance: RemoteFunction = Instance.new("RemoteFunction")
-		instance.Name = metadata.name
-		instance.Parent = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
-		
+		local instance: RemoteFunction?
+		local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 		if runContext == "Server" then
-			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 			if eventsFolder:FindFirstChild(metadata.name) then
 				log(1, `Instance {metadata.name} already exists`, "Building events folder")
 				return
@@ -403,7 +404,6 @@ Net = {
 			instance.Name = metadata.name
 			instance.Parent = eventsFolder
 		elseif runContext == "Client" then
-			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 			instance = eventsFolder:WaitForChild(metadata.name)
 		end
 		

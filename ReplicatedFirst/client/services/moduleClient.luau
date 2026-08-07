@@ -21,8 +21,8 @@ return {
 	end,
 	
 	ready = function(self: self)
-		nodes.nodeA.onCast:Connect(function(header: nodeTypes.Header, payload: nodeTypes.MyPayload)
+		--[[nodes.nodeA.onCast:Connect(function(header: nodeTypes.Header, payload: nodeTypes.MyPayload)
 			warn("client received", header, payload)
-		end)
+		end)]]
 	end,
 }
