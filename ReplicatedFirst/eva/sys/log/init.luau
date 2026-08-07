@@ -75,7 +75,7 @@ return function(code: number, header: string, context: string?, fields: { { stri
 	local textField: string = `{SEPARATOR} header: {header}`
 	local contextField: string? = context ~= nil and `{SEPARATOR} context: {context}`
 	local fieldsStr: string? = fields ~= nil and (function()
-		assert(#fields > 0, `[!] Given \`fields\` is an empty table - populate it!`)
+		assert(#fields > 0, `[!] Given \`fields\` is an empty table - populate or remove it!`)
 		local strings = {}
 		for _, field: { string } in fields do
 			--assert(typeof(field[``]) == "string", `[!] Given field \`title\` was not a string (got {typeof(field[1])})`)
@@ -86,7 +86,7 @@ return function(code: number, header: string, context: string?, fields: { { stri
 		return table.concat(strings, "\n")
 	end)()
 	
-	local message = `{codeInfo.title}\n{textField}`
+	local message = `\n\n[{codeInfo.title:upper()}]\n{textField}`
 	if contextField then
 		message = `{message}\n{contextField}`
 	end
@@ -95,7 +95,7 @@ return function(code: number, header: string, context: string?, fields: { { stri
 	end
 	
 	local scriptName: string, line: string = getSource()
-	message = `{message}\n{SEPARATOR} at: line {line} of {scriptName}`
+	message = `{message}\n{SEPARATOR} at: line {line} of {scriptName}\n`
 	
 	codeInfo.callback(message)
 end
