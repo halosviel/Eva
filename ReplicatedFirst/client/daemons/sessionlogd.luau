@@ -11,20 +11,21 @@
 local types = require("../types/daemons")
 type self = types.SessionLogD
 
+local version = require("@game/ReplicatedFirst/eva/sys/version")
+
 return {
 	runsFirst = true,
 	dependencies = {},
 	
 	constructor = function(self: self)
 		self.JOIN_LOGS_ENABLED = true
-		self.VERSION = "1.0.0"
 	end,
 	
 	ready = function(self: self)
 		--## Session Start ##--
 		
 		if self.JOIN_LOGS_ENABLED == true then
-			print(`Eva {self.VERSION}\n`)
+			print(`EVA {version}\n`)
 			
 			--# functions from Pip's kofetch
 			local function getNetworkStatus() : string
