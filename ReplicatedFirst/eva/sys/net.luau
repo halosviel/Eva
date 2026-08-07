@@ -18,6 +18,7 @@
 	
 	[NOTES]
 	- There is no lifecycle handling for the node objects - they are events!
+	- Cannot have 2 nodes of any type with the same name.
 ]=]
 
 --## Config ##--
@@ -58,7 +59,8 @@ type CastNode = {
 
 type RequestNode = {
 	instance: RemoteFunction,
-	metadata: Metadata
+	metadata: Metadata,
+	callback: ( player: Player, header: nodeTypes.Header, payload: nodeTypes.Payload ) -> nil
 }
 
 type Net = {
@@ -326,7 +328,6 @@ Net = {
 				
 				local isPayloadValid: boolean = validatePayloadInsecure(payload)
 				if isPayloadValid == false then
-					
 					log(4, "Cast entry dropped (Invalid payload)")
 					return
 				end
@@ -343,15 +344,16 @@ Net = {
 		return self
 	end,
 	
+	--# basically duplicate code from above idc
 	newRequestNode = function(metadata: Metadata) : RequestNode
 		
 		--## Validation ##--
 		
 		expect("table", metadata, "`metadata` must be a table")
-		expect("string", metadata.name, "`metadata` must contain a string `name`")
+		expect("string", metadata.name, "`name` must be a string")
 		
 		if metadata.rateLimit ~= nil then
-			expect("number", metadata.rateLimit)
+			expect("number", metadata.rateLimit, "`rateLimit` must be a number")
 		end
 		
 		--## Create Node ##--
@@ -360,14 +362,51 @@ Net = {
 		instance.Name = metadata.name
 		instance.Parent = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
 		
+		if runContext == "Server" then
+			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
+			if eventsFolder:FindFirstChild(metadata.name) then
+				log(1, `Instance {metadata.name} already exists`, "Building events folder")
+				return
+			end
+			
+			instance = Instance.new("RemoteFunction")
+			instance.Name = metadata.name
+			instance.Parent = eventsFolder
+		elseif runContext == "Client" then
+			local eventsFolder: Folder = game.ReplicatedStorage:WaitForChild(EVENTS_FOLDER_NAME)
+			instance = eventsFolder:WaitForChild(metadata.name)
+		end
+		
 		local self: RequestNode = setmetatable({
 			instance = instance,
-			metadata = metadata
+			metadata = metadata,
+			callback = nil
 		} :: RequestNode, RequestNodeTable)
 		
 		--## Event Handling ##--
 		
-		
+		if runContext == "Server" then
+			self.instance.OnServerInvoke = function(player: Player, header: nodeTypes.Header, payload: nodeTypes.Payload) : ( nodeTypes.Header, nodeTypes.Payload )
+				local isHeaderValid: boolean = validateHeaderInsecure(header)
+				if isHeaderValid == false then
+					log(4, "Request entry dropped (Invalid header)")
+					return
+				end
+				
+				local isPayloadValid: boolean = validatePayloadInsecure(payload)
+				if isPayloadValid == false then
+					log(4, "Request entry dropped (Invalid payload)")
+					return
+				end
+				
+				secureHeader(header, player)
+				return self.callback(player, header, payload)
+			end
+		elseif runContext == "Client" then
+			self.instance.OnClientInvoke = function(header: nodeTypes.Header, payload: nodeTypes.Payload) : ( nodeTypes.Header, nodeTypes.Payload )
+				return self.callback(header, payload)
+			end
+		end
 		
 		return self
 	end,
