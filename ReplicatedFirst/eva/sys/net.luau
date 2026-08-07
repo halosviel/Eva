@@ -156,7 +156,7 @@ end
 local function handleRateLimit(node: CastNode | RequestNode) : boolean
 	local entryName: string = node.instance:IsA("RemoteFunction") and "lastRequest" or "lastCast"
 	local lastTriggered: number = node[entryName]
-	print(node)
+	
 	local isRateLimited: boolean = (os.clock() - lastTriggered < node.metadata.rateLimit) and node.metadata.rateLimit > 0
 	
 	if not isRateLimited then
@@ -303,7 +303,7 @@ RequestNodeTable = {
 			return responseHeader, responsePayload
 		elseif runContext == "Client" then
 			local responsePayload: nodeTypes.Payload = self.instance:InvokeServer(header, payload)
-			local responseHeader: nodeTypes.Header = createHeader("Server", payload.player.Name)
+			local responseHeader: nodeTypes.Header = createHeader("Server", game.Players.LocalPlayer.Name)
 			return responseHeader, responsePayload
 		end
 	end,
