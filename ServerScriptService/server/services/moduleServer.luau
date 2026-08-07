@@ -34,7 +34,7 @@ return {
 			task.wait(0.1)]]
 			
 			warn("server sent")
-			local header: nodeTypes.Header, payload: nodeTypes.Payload = nodes.nodeB:request({
+			local header: nodeTypes.Header, payload: nodeTypes.Payload = nodes.nodeB:Request({
 				player = game.Players.halosviel
 			} :: nodeTypes.Payload & nodeTypes.ServerRequestNodePayload)
 			warn("server received", header, payload)
@@ -46,8 +46,6 @@ return {
 					fromServer = true
 				}
 			end)]]
-			
-			nodes.nodeB:request()
 		end)
 	end,
 }
