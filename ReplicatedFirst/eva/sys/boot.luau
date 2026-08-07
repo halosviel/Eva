@@ -69,7 +69,7 @@ return function(root: Folder)
 		callback = function()
 			clock = nil
 		end
-	})
+	} :: processClock.Config)
 	
 	local startTimestamp: number = os.clock()
 	
