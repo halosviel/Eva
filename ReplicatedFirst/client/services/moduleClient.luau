@@ -7,9 +7,6 @@
 	Module template.
 ]=]
 
-local nodes = require("@game/ReplicatedFirst/shared/nodes")
-local nodeTypes = require("@game/ReplicatedFirst/client/types/nodes")
-
 local types = require("../types/services")
 type self = types.Module
 
@@ -21,24 +18,6 @@ return {
 	end,
 	
 	ready = function(self: self)
-		--[[nodes.nodeA.onCast:Connect(function(header: nodeTypes.Header, payload: nodeTypes.MyPayload)
-			warn("client received", header, payload)
-		end)]]
-		
-		nodes.nodeB:onRequest(function(header: nodeTypes.Header, payload: nodeTypes.Payload)
-			warn("client received", header, payload)
-			warn("client sent")
-			
-			return {
-				fromClient = true
-			}
-		end)
-		
-		--[[warn("client sent")
-		local header, response = nodes.nodeB:request({
-			fromClient = true
-		})
-		warn("client received", header, response)]]
 		
 	end,
 }
